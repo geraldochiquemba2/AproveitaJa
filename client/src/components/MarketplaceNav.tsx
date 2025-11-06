@@ -3,6 +3,7 @@ import { ShoppingCart, User, Home, Package, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +20,26 @@ interface MarketplaceNavProps {
 export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
+      <nav 
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled 
+            ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm' 
+            : 'bg-transparent'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between h-16">
             <Link href="/" data-testid="link-logo">
