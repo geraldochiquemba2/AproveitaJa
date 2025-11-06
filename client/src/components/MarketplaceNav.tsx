@@ -128,52 +128,52 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
         </div>
       </nav>
 
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border safe-area-inset-bottom">
         <div className={`grid h-16 ${user ? 'grid-cols-4' : 'grid-cols-2'}`}>
           <Link href="/" data-testid="link-mobile-home">
-            <button className={`flex flex-col items-center justify-center h-full ${location === '/' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <Home className="h-5 w-5" />
-              <span className="text-xs mt-1">Início</span>
+            <button className={`flex flex-col items-center justify-center h-full gap-0.5 px-1 ${location === '/' ? 'text-primary' : 'text-muted-foreground'}`}>
+              <Home className="h-5 w-5 flex-shrink-0" />
+              <span className="text-[10px] leading-tight">Início</span>
             </button>
           </Link>
           {user?.role === 'seller' && (
             <Link href="/vendedor/dashboard" data-testid="link-mobile-dashboard">
-              <button className={`flex flex-col items-center justify-center h-full ${location === '/vendedor/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>
-                <Package className="h-5 w-5" />
-                <span className="text-xs mt-1">Produtos</span>
+              <button className={`flex flex-col items-center justify-center h-full gap-0.5 px-1 ${location === '/vendedor/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>
+                <Package className="h-5 w-5 flex-shrink-0" />
+                <span className="text-[10px] leading-tight">Produtos</span>
               </button>
             </Link>
           )}
           {user && (
             <Link href="/carrinho" data-testid="link-mobile-cart">
-              <button className={`flex flex-col items-center justify-center h-full relative ${location === '/carrinho' ? 'text-primary' : 'text-muted-foreground'}`}>
-                <ShoppingCart className="h-5 w-5" />
+              <button className={`flex flex-col items-center justify-center h-full gap-0.5 px-1 relative ${location === '/carrinho' ? 'text-primary' : 'text-muted-foreground'}`}>
+                <ShoppingCart className="h-5 w-5 flex-shrink-0" />
                 {cartCount > 0 && (
-                  <Badge className="absolute top-2 right-1/4 h-4 w-4 flex items-center justify-center p-0 text-xs">
+                  <Badge className="absolute top-1.5 left-1/2 -translate-x-1/2 translate-x-2 h-4 w-4 flex items-center justify-center p-0 text-[10px]">
                     {cartCount}
                   </Badge>
                 )}
-                <span className="text-xs mt-1">Carrinho</span>
+                <span className="text-[10px] leading-tight">Carrinho</span>
               </button>
             </Link>
           )}
           {user ? (
             <button
               onClick={() => logout()}
-              className="flex flex-col items-center justify-center h-full text-muted-foreground"
+              className="flex flex-col items-center justify-center h-full gap-0.5 px-1 text-muted-foreground"
               data-testid="button-mobile-logout"
             >
-              <LogOut className="h-5 w-5" />
-              <span className="text-xs mt-1">Sair</span>
+              <LogOut className="h-5 w-5 flex-shrink-0" />
+              <span className="text-[10px] leading-tight">Sair</span>
             </button>
           ) : (
             <button
               onClick={() => setLocation('/login')}
-              className="flex flex-col items-center justify-center h-full text-muted-foreground"
+              className="flex flex-col items-center justify-center h-full gap-0.5 px-1 text-muted-foreground"
               data-testid="button-mobile-login"
             >
-              <LogIn className="h-5 w-5" />
-              <span className="text-xs mt-1">Entrar</span>
+              <LogIn className="h-5 w-5 flex-shrink-0" />
+              <span className="text-[10px] leading-tight">Entrar</span>
             </button>
           )}
         </div>
