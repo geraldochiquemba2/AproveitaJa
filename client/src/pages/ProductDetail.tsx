@@ -103,7 +103,7 @@ export default function ProductDetail() {
 
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2" data-testid="text-product-name">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-product-name">
                 {product.name}
               </h1>
               {store && (
@@ -118,7 +118,7 @@ export default function ProductDetail() {
               <CardContent className="pt-6 space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Preço com Desconto + Taxa</p>
-                  <p className="text-4xl font-bold text-primary" data-testid="text-price">
+                  <p className="text-3xl sm:text-4xl font-bold text-primary" data-testid="text-price">
                     {priceWithFee.toFixed(2)} Kz
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">

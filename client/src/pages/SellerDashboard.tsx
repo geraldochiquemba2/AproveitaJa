@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Edit, Trash2, Store as StoreIcon, MapPin } from 'lucide-react';
+import { Loader2, Plus, Trash2, Store as StoreIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -39,8 +39,6 @@ export default function SellerDashboard() {
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
   const [productProvince, setProductProvince] = useState<ProvinceName | ''>('');
   const [productMunicipality, setProductMunicipality] = useState('');
-  const [productLocation, setProductLocation] = useState({ latitude: '', longitude: '' });
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const { data: stores, isLoading: storesLoading } = useQuery<Store[]>({
     queryKey: ['/api/stores/my'],
@@ -87,7 +85,6 @@ export default function SellerDashboard() {
       setProductDialogOpen(false);
       setProductProvince('');
       setProductMunicipality('');
-      setProductLocation({ latitude: '', longitude: '' });
       toast({ title: 'Produto adicionado com sucesso!' });
     },
     onError: (error: any) => {
@@ -168,8 +165,6 @@ export default function SellerDashboard() {
         imageUrl: base64String,
         province: productProvince,
         municipality: productMunicipality,
-        latitude: formData.get('latitude') as string,
-        longitude: formData.get('longitude') as string,
         supervisorPhone: formData.get('supervisorPhone') as string,
       };
       
@@ -181,37 +176,6 @@ export default function SellerDashboard() {
 
   const handleDeactivateProduct = (id: string) => {
     updateProductMutation.mutate({ id, data: { isActive: false } });
-  };
-
-  const handleGetCurrentLocation = () => {
-    setIsGettingLocation(true);
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setProductLocation({
-            latitude: position.coords.latitude.toFixed(6),
-            longitude: position.coords.longitude.toFixed(6),
-          });
-          setIsGettingLocation(false);
-          toast({ title: 'Localização capturada com sucesso!' });
-        },
-        (error) => {
-          setIsGettingLocation(false);
-          toast({
-            title: 'Erro ao obter localização',
-            description: 'Verifique se permitiu acesso à localização',
-            variant: 'destructive',
-          });
-        }
-      );
-    } else {
-      setIsGettingLocation(false);
-      toast({
-        title: 'Geolocalização não suportada',
-        description: 'Seu navegador não suporta geolocalização',
-        variant: 'destructive',
-      });
-    }
   };
 
   if (user?.role !== 'seller') {
@@ -231,7 +195,7 @@ export default function SellerDashboard() {
     return (
       <div className="min-h-screen">
         <MarketplaceNav />
-        <div className="max-w-2xl mx-auto p-6 mt-12">
+        <div className="max-w-2xl mx-auto p-4 sm:p-6 mt-6 sm:mt-12">
           <Card>
             <CardHeader>
               <CardTitle>Bem-vindo ao Aproveita Já</CardTitle>
@@ -247,7 +211,7 @@ export default function SellerDashboard() {
                     Criar Minha Loja
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Criar Nova Loja</DialogTitle>
                     <DialogDescription>
@@ -274,7 +238,7 @@ export default function SellerDashboard() {
                         data-testid="input-supervisor-phone"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="province">Província</Label>
                         <Select
@@ -354,23 +318,23 @@ export default function SellerDashboard() {
     <div className="min-h-screen pb-20 md:pb-6">
       <MarketplaceNav />
       <div className="max-w-7xl mx-auto p-4 md:p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-dashboard-title">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold" data-testid="text-dashboard-title">
             Minha Loja: {store.storeName}
           </h1>
-          <p className="text-muted-foreground">{store.address}</p>
+          <p className="text-sm sm:text-base text-muted-foreground break-words">{store.address}</p>
         </div>
 
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Meus Produtos</h2>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold">Meus Produtos</h2>
           <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
             <DialogTrigger asChild>
-              <Button data-testid="button-add-product">
+              <Button data-testid="button-add-product" className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 Adicionar Produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Adicionar Novo Produto</DialogTitle>
                 <DialogDescription>
@@ -387,7 +351,7 @@ export default function SellerDashboard() {
                     data-testid="input-product-name"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="originalPrice">Preço Original (Kz)</Label>
                     <Input
@@ -486,59 +450,6 @@ export default function SellerDashboard() {
                     </Select>
                   </div>
                 )}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label>Localização do Produto</Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleGetCurrentLocation}
-                      disabled={isGettingLocation}
-                      data-testid="button-get-location"
-                    >
-                      {isGettingLocation ? (
-                        <>
-                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                          Obtendo...
-                        </>
-                      ) : (
-                        <>
-                          <MapPin className="mr-2 h-3 w-3" />
-                          Usar GPS
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Input
-                        id="latitude"
-                        name="latitude"
-                        type="text"
-                        placeholder="-8.838333"
-                        value={productLocation.latitude}
-                        onChange={(e) => setProductLocation({ ...productLocation, latitude: e.target.value })}
-                        required
-                        data-testid="input-product-latitude"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Latitude</p>
-                    </div>
-                    <div>
-                      <Input
-                        id="longitude"
-                        name="longitude"
-                        type="text"
-                        placeholder="13.234444"
-                        value={productLocation.longitude}
-                        onChange={(e) => setProductLocation({ ...productLocation, longitude: e.target.value })}
-                        required
-                        data-testid="input-product-longitude"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Longitude</p>
-                    </div>
-                  </div>
-                </div>
                 <Button
                   type="submit"
                   disabled={createProductMutation.isPending}

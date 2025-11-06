@@ -36,8 +36,6 @@ export const products = pgTable("products", {
   imageUrl: text("image_url").notNull(),
   province: text("province").notNull(),
   municipality: text("municipality").notNull(),
-  latitude: text("latitude").notNull(),
-  longitude: text("longitude").notNull(),
   supervisorPhone: text("supervisor_phone").notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   isActive: boolean("is_active").notNull().default(true),
