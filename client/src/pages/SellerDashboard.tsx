@@ -39,6 +39,7 @@ export default function SellerDashboard() {
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
   const [productProvince, setProductProvince] = useState<ProvinceName | ''>('');
   const [productMunicipality, setProductMunicipality] = useState('');
+  const [discountedPriceInput, setDiscountedPriceInput] = useState('');
 
   const { data: stores, isLoading: storesLoading } = useQuery<Store[]>({
     queryKey: ['/api/stores/my'],
@@ -85,6 +86,7 @@ export default function SellerDashboard() {
       setProductDialogOpen(false);
       setProductProvince('');
       setProductMunicipality('');
+      setDiscountedPriceInput('');
       toast({ title: 'Produto adicionado com sucesso!' });
     },
     onError: (error: any) => {
@@ -156,11 +158,14 @@ export default function SellerDashboard() {
     reader.onloadend = () => {
       const base64String = reader.result as string;
       
+      const baseDiscountedPrice = parseFloat(formData.get('discountedPrice') as string);
+      const finalDiscountedPrice = baseDiscountedPrice * 1.10;
+      
       const productData = {
         storeId: store!.id,
         name: formData.get('name') as string,
         originalPrice: formData.get('originalPrice') as string,
-        discountedPrice: formData.get('discountedPrice') as string,
+        discountedPrice: finalDiscountedPrice.toFixed(2),
         expirationDate: new Date(formData.get('expirationDate') as string).toISOString(),
         imageUrl: base64String,
         province: productProvince,
@@ -327,7 +332,17 @@ export default function SellerDashboard() {
 
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl font-semibold">Meus Produtos</h2>
-          <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
+          <Dialog 
+            open={productDialogOpen} 
+            onOpenChange={(open) => {
+              setProductDialogOpen(open);
+              if (!open) {
+                setDiscountedPriceInput('');
+                setProductProvince('');
+                setProductMunicipality('');
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button data-testid="button-add-product" className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
@@ -372,7 +387,16 @@ export default function SellerDashboard() {
                       step="0.01"
                       required
                       data-testid="input-discounted-price"
+                      onChange={(e) => setDiscountedPriceInput(e.target.value)}
                     />
+                    {discountedPriceInput && parseFloat(discountedPriceInput) > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <strong>Preço Final (com taxa de 10%):</strong>{' '}
+                        <span className="text-primary font-semibold">
+                          {(parseFloat(discountedPriceInput) * 1.10).toFixed(2)} Kz
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div>
