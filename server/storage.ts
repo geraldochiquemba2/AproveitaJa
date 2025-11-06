@@ -1,37 +1,165 @@
-import { type User, type InsertUser } from "@shared/schema";
+import { type User, type InsertUser, type Product, type InsertProduct, type Store, type InsertStore, type Order, type InsertOrder } from "@shared/schema";
 import { randomUUID } from "crypto";
 
-// modify the interface with any CRUD methods
-// you might need
-
 export interface IStorage {
+  // Users
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Stores
+  getStore(id: string): Promise<Store | undefined>;
+  getStoresByUserId(userId: string): Promise<Store[]>;
+  createStore(store: InsertStore): Promise<Store>;
+  
+  // Products
+  getProduct(id: string): Promise<Product | undefined>;
+  getActiveProducts(): Promise<Product[]>;
+  getProductsByStoreId(storeId: string): Promise<Product[]>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: string, updates: Partial<Product>): Promise<Product | undefined>;
+  
+  // Orders
+  getOrder(id: string): Promise<Order | undefined>;
+  getAllOrders(): Promise<Order[]>;
+  getOrdersByBuyerId(buyerId: string): Promise<Order[]>;
+  createOrder(order: InsertOrder): Promise<Order>;
+  updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private stores: Map<string, Store>;
+  private products: Map<string, Product>;
+  private orders: Map<string, Order>;
 
   constructor() {
     this.users = new Map();
+    this.stores = new Map();
+    this.products = new Map();
+    this.orders = new Map();
   }
 
+  // Users
   async getUser(id: string): Promise<User | undefined> {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find((user) => user.phone === phone);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = {
+      ...insertUser,
+      id,
+      role: insertUser.role ?? "buyer",
+      address: insertUser.address ?? null,
+      latitude: insertUser.latitude ?? null,
+      longitude: insertUser.longitude ?? null,
+    };
     this.users.set(id, user);
     return user;
+  }
+
+  // Stores
+  async getStore(id: string): Promise<Store | undefined> {
+    return this.stores.get(id);
+  }
+
+  async getStoresByUserId(userId: string): Promise<Store[]> {
+    return Array.from(this.stores.values()).filter((store) => store.userId === userId);
+  }
+
+  async createStore(insertStore: InsertStore): Promise<Store> {
+    const id = randomUUID();
+    const store: Store = { ...insertStore, id };
+    this.stores.set(id, store);
+    return store;
+  }
+
+  // Products
+  async getProduct(id: string): Promise<Product | undefined> {
+    return this.products.get(id);
+  }
+
+  async getActiveProducts(): Promise<Product[]> {
+    const now = new Date();
+    const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
+    
+    return Array.from(this.products.values()).filter(
+      (product) => 
+        product.isActive && 
+        new Date(product.createdAt) > tenDaysAgo
+    );
+  }
+
+  async getProductsByStoreId(storeId: string): Promise<Product[]> {
+    return Array.from(this.products.values()).filter(
+      (product) => product.storeId === storeId
+    );
+  }
+
+  async createProduct(insertProduct: InsertProduct): Promise<Product> {
+    const id = randomUUID();
+    const product: Product = {
+      ...insertProduct,
+      id,
+      createdAt: new Date(),
+      isActive: true,
+    };
+    this.products.set(id, product);
+    return product;
+  }
+
+  async updateProduct(id: string, updates: Partial<Product>): Promise<Product | undefined> {
+    const product = this.products.get(id);
+    if (!product) return undefined;
+    
+    const updated = { ...product, ...updates };
+    this.products.set(id, updated);
+    return updated;
+  }
+
+  // Orders
+  async getOrder(id: string): Promise<Order | undefined> {
+    return this.orders.get(id);
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return Array.from(this.orders.values());
+  }
+
+  async getOrdersByBuyerId(buyerId: string): Promise<Order[]> {
+    return Array.from(this.orders.values()).filter(
+      (order) => order.buyerId === buyerId
+    );
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const id = randomUUID();
+    const order: Order = {
+      ...insertOrder,
+      id,
+      quantity: insertOrder.quantity ?? "1",
+      deliveryAddress: insertOrder.deliveryAddress ?? null,
+      deliveryLatitude: insertOrder.deliveryLatitude ?? null,
+      deliveryLongitude: insertOrder.deliveryLongitude ?? null,
+      status: "pending",
+      createdAt: new Date(),
+    };
+    this.orders.set(id, order);
+    return order;
+  }
+
+  async updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
+    const order = this.orders.get(id);
+    if (!order) return undefined;
+    
+    const updated = { ...order, status };
+    this.orders.set(id, updated);
+    return updated;
   }
 }
 

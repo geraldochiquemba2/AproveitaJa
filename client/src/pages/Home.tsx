@@ -1,102 +1,122 @@
-import Navigation from "@/components/Navigation";
-import Hero from "@/components/Hero";
-import ProjectGrid from "@/components/ProjectGrid";
-import AboutSection from "@/components/AboutSection";
-import ContactSection from "@/components/ContactSection";
-import Footer from "@/components/Footer";
+import { useState } from "react";
+import MarketplaceNav from "@/components/MarketplaceNav";
+import MarketplaceHero from "@/components/MarketplaceHero";
+import CategoryFilter from "@/components/CategoryFilter";
+import ProductCard from "@/components/ProductCard";
 
-import heroImage from '@assets/generated_images/Modern_minimalist_architecture_hero_66c559ce.png';
-import aboutImage from '@assets/generated_images/Architect_workspace_about_section_aaa27276.png';
-import project1 from '@assets/generated_images/Residential_project_showcase_2e12f3b3.png';
-import project2 from '@assets/generated_images/Interior_design_project_d523028d.png';
-import project3 from '@assets/generated_images/Commercial_project_showcase_2286b3a8.png';
-import project4 from '@assets/generated_images/Architectural_detail_texture_b08f0b07.png';
-import project5 from '@assets/generated_images/Luxury_villa_project_3c9073b1.png';
+import heroImage from '@assets/generated_images/Hero_image_shoppers_Angola_00c6e573.png';
+import bakeryImage from '@assets/generated_images/Bakery_products_showcase_d3685112.png';
+import dairyImage from '@assets/generated_images/Dairy_products_display_4914624c.png';
+import produceImage from '@assets/generated_images/Fresh_produce_assortment_8f0aba1c.png';
+import snacksImage from '@assets/generated_images/Snacks_beverages_products_e98014c5.png';
 
 export default function Home() {
-  const projects = [
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  const categories = ["Padaria", "Laticínios", "Frutas", "Bebidas", "Snacks"];
+
+  const mockProducts = [
     {
       id: "1",
-      title: "Casa Moderna",
-      category: "Residencial",
-      location: "São Paulo",
-      year: "2024",
-      imageSrc: project1,
+      name: "Pão Fresco Artesanal",
+      originalPrice: 500,
+      discountedPrice: 250,
+      storeName: "Supermercado Central",
+      imageUrl: bakeryImage,
+      expirationDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+      category: "Padaria",
     },
     {
       id: "2",
-      title: "Espaço Interno",
-      category: "Interior",
-      location: "Rio de Janeiro",
-      year: "2024",
-      imageSrc: project2,
+      name: "Leite Fresco 1L",
+      originalPrice: 800,
+      discountedPrice: 350,
+      storeName: "Loja do Bairro",
+      imageUrl: dairyImage,
+      expirationDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+      category: "Laticínios",
     },
     {
       id: "3",
-      title: "Edifício Comercial",
-      category: "Comercial",
-      location: "Brasília",
-      year: "2023",
-      imageSrc: project3,
+      name: "Mix de Frutas Frescas",
+      originalPrice: 1200,
+      discountedPrice: 500,
+      storeName: "Mercado Verde",
+      imageUrl: produceImage,
+      expirationDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      category: "Frutas",
     },
     {
       id: "4",
-      title: "Detalhes Arquitetônicos",
-      category: "Conceito",
-      location: "Curitiba",
-      year: "2023",
-      imageSrc: project4,
+      name: "Pack Snacks Variados",
+      originalPrice: 1500,
+      discountedPrice: 600,
+      storeName: "Supermercado Popular",
+      imageUrl: snacksImage,
+      expirationDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      category: "Snacks",
     },
     {
       id: "5",
-      title: "Villa Contemporânea",
-      category: "Residencial",
-      location: "Florianópolis",
-      year: "2024",
-      imageSrc: project5,
+      name: "Croissants Frescos",
+      originalPrice: 600,
+      discountedPrice: 280,
+      storeName: "Padaria Moderna",
+      imageUrl: bakeryImage,
+      expirationDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+      category: "Padaria",
     },
     {
       id: "6",
-      title: "Residência Minimalista",
-      category: "Residencial",
-      location: "Porto Alegre",
-      year: "2023",
-      imageSrc: project1,
+      name: "Iogurte Natural",
+      originalPrice: 400,
+      discountedPrice: 180,
+      storeName: "Supermercado Central",
+      imageUrl: dairyImage,
+      expirationDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+      category: "Laticínios",
     },
   ];
 
-  const handleHeroClick = () => {
-    const projectsSection = document.getElementById('projects');
-    projectsSection?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const filteredProducts = selectedCategory
+    ? mockProducts.filter((p) => p.category === selectedCategory)
+    : mockProducts;
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-      <Hero
-        title="Arquitetura Moderna & Minimalista"
-        subtitle="Criando espaços que respiram"
+    <div className="min-h-screen pb-20 md:pb-0">
+      <MarketplaceNav cartCount={0} />
+      
+      <MarketplaceHero
         imageSrc={heroImage}
-        onCtaClick={handleHeroClick}
+        onSearch={(query) => console.log("Search:", query)}
       />
-      
-      <div id="projects">
-        <ProjectGrid
-          projects={projects}
-          title="Projetos Selecionados"
-          subtitle="Uma coleção de obras que definem nossa abordagem ao design moderno e funcional"
-        />
-      </div>
-      
-      <AboutSection
-        imageSrc={aboutImage}
-        title="Sobre o Estúdio"
-        description="Com mais de uma década de experiência em arquitetura moderna e design minimalista, nosso estúdio se dedica a criar espaços que harmonizam funcionalidade e estética. Cada projeto é uma jornada única, onde forma e função se encontram para criar ambientes que inspiram."
-        philosophy="Menos é mais. A verdadeira arquitetura não é sobre adicionar, mas sobre revelar a essência do espaço."
+
+      <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
       />
-      
-      <ContactSection />
-      <Footer />
+
+      <section className="py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-2">Produtos em Destaque</h2>
+            <p className="text-muted-foreground">
+              Economize até 70% em produtos frescos antes da validade
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                {...product}
+                onClick={() => console.log("Product clicked:", product.id)}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

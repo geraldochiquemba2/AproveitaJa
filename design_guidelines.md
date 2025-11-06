@@ -1,123 +1,137 @@
-# Modern Minimalist Architecture Portfolio - Design Guidelines
+# Aproveita Já - Marketplace Design Guidelines
 
 ## Design Approach
-**Reference-Based Approach**: Drawing inspiration from premium architecture portfolios (Leibal, Studio Nido, Archdaily) combined with minimalist design principles. The design emphasizes visual storytelling through large-format photography with restrained, elegant UI elements.
+**Reference-Based**: Drawing from discount marketplaces (Too Good To Go, Flashfood, Mercado Livre) combined with urgency-driven e-commerce patterns. Mobile-first design emphasizing speed, trust, and time-sensitive deals.
 
 ## Typography System
 
 ### Font Families
-- **Primary (Headings)**: Montserrat (Light 300, Regular 400)
-- **Secondary (Body)**: Inter (Regular 400, Medium 500)
-- **Accent**: Use sparingly for special emphasis
+- **Primary**: Inter (Medium 500, SemiBold 600, Bold 700)
+- **Secondary**: System fonts for speed (-apple-system, BlinkMacSystemFont)
 
 ### Hierarchy
-- **Hero Headline**: 4xl-6xl (mobile to desktop), font-weight 300, tracking-tight
-- **Section Titles**: 2xl-3xl, font-weight 300, uppercase with letter-spacing
-- **Project Titles**: xl-2xl, font-weight 400
-- **Body Text**: base-lg (16-18px), line-height relaxed (1.7)
-- **Metadata/Captions**: sm-base, font-weight 400, uppercase tracking-wide
+- **Hero Headline**: 3xl-5xl, font-weight 700
+- **Product Titles**: lg-xl, font-weight 600
+- **Prices/Discounts**: 2xl-3xl, font-weight 700 (discounts), line-through for original
+- **Body Text**: sm-base, font-weight 400-500
+- **Countdown Timers**: lg-xl, font-weight 600, tabular-nums
+- **Labels/Categories**: xs-sm, font-weight 500, uppercase tracking-wide
 
 ## Layout System
 
 ### Spacing Units
-Primary spacing scale: **4, 8, 12, 16, 20, 24, 32** (Tailwind units)
-- Micro spacing: 2, 4
-- Component spacing: 8, 12, 16
-- Section spacing: 20, 24, 32
-- Generous vertical rhythm: py-20 (mobile), py-32 (desktop)
+Core spacing: **2, 4, 6, 8, 12, 16** (Tailwind units)
+- Tight spacing: 2, 4 (product cards, compact mobile)
+- Standard: 6, 8 (most components)
+- Generous: 12, 16 (section separation)
 
 ### Grid System
-- **Container**: max-w-7xl with px-4 md:px-8
-- **Project Grid**: grid-cols-1 md:grid-cols-2 lg:grid-cols-3, gap-8 md:gap-12
-- **Content Width**: max-w-4xl for text-heavy sections, max-w-prose for reading content
+- **Container**: max-w-7xl, px-4 md:px-6
+- **Product Grid**: grid-cols-2 md:grid-cols-3 lg:grid-cols-4, gap-4 md:gap-6
+- **Mobile Priority**: Single-column forms, two-column product grids
 
 ## Component Library
 
 ### Navigation
-- **Fixed header**: Minimal, transparent on hero, solid background on scroll
-- **Logo**: Left-aligned, simple wordmark or icon
-- **Menu**: Right-aligned horizontal list with generous spacing (gap-8 md:gap-12)
-- **Links**: Uppercase, tracking-wide, sm-base size, underline on hover (subtle 1px)
-- **Mobile**: Hamburger menu, full-screen overlay with large centered links
+- **Sticky Header**: Solid background (no transparency), shadow on scroll
+- **Logo**: Left-aligned with tagline "Economize Antes que Expire"
+- **Icons**: Cart counter badge, user profile, search icon
+- **Bottom Nav (Mobile)**: Fixed 4-icon navigation (Home, Categories, Favorites, Profile)
+- **Desktop**: Horizontal menu with search bar integrated
 
-### Hero Section
-- **Height**: 90vh minimum (not forced 100vh)
-- **Layout**: Full-width background image with centered overlay content
-- **Content**: Large headline + subtitle + single CTA button
-- **Image**: High-quality architectural photography, slightly darkened overlay for text legibility
-- **Button**: Backdrop blur effect (backdrop-blur-sm), semi-transparent background, px-8 py-4
+### Hero Section (Homepage)
+- **Height**: 60vh mobile, 70vh desktop
+- **Image**: High-quality photo of fresh products/happy shoppers
+- **Overlay**: Dark gradient (top to bottom, opacity 40-60%)
+- **Content**: Bold headline + value proposition + search bar or CTA
+- **CTA Button**: Backdrop-blur, semi-transparent background (bg-white/20), px-8 py-4, bold text
 
-### Project Grid/Gallery
-- **Card Structure**: Image-first with hover overlay revealing title + year + location
-- **Image Aspect**: 3:4 portrait or 16:9 landscape (consistent throughout)
-- **Hover Effect**: Subtle scale (scale-105) + opacity overlay
-- **Spacing**: Generous gap-8 to gap-16 between cards
-- **Grid Behavior**: Single column mobile, 2-col tablet, 3-col desktop
+### Product Cards
+- **Structure**: Image (square 1:1), Badge (discount %), Title, Original Price (strikethrough), New Price, Countdown Timer, Store Name
+- **Image**: Lazy-loaded, object-cover, rounded corners (rounded-lg)
+- **Discount Badge**: Absolute top-right, rounded-full, px-3 py-1, bold text
+- **Countdown**: Icon + time remaining (e.g., "Expira em 2 dias"), urgent styling for <24h
+- **Hover**: Subtle shadow increase (no scale to avoid layout shift on mobile)
 
-### Project Detail Pages
-- **Hero**: Full-width featured image, 60-70vh height
-- **Info Bar**: Sticky or fixed bar with: Project Title, Year, Location, Type, Size
-- **Gallery**: Full-width images stacked vertically with gap-12 to gap-16
-- **Text Content**: max-w-3xl centered, generous line-height (1.7-1.8)
-- **Alternating Layouts**: Mix full-width images with two-column image pairs
+### Search & Filters
+- **Search Bar**: Full-width on mobile, rounded-full, px-6 py-3, icon left
+- **Filter Pills**: Horizontal scroll on mobile, categories as rounded-full chips
+- **Sort Dropdown**: Right-aligned, options for Price, Discount %, Expiration Date
 
-### About Section
-- **Layout**: Two-column on desktop (image left, text right or vice versa)
-- **Image**: Large portrait or workspace photo, 50% width on desktop
-- **Bio**: max-w-prose, comfortable reading width
-- **Services List**: Simple vertical list or grid with minimal styling
+### Product Detail Page
+- **Image Gallery**: Swipeable carousel (mobile), grid (desktop), 4:3 aspect ratio
+- **Info Block**: Product name, store name with verification badge, countdown timer prominent
+- **Pricing**: Large discount price, smaller strikethrough original, percentage savings badge
+- **Action Buttons**: "Comprar Agora" (primary, full-width mobile) + "Adicionar ao Carrinho" (secondary)
+- **Details Accordion**: Ingredients/Description, Nutritional Info, Store Location/Hours
 
-### Contact Section
-- **Form Layout**: Single column, max-w-2xl centered
-- **Input Fields**: Clean borders, generous padding (py-4 px-6), focus states with border emphasis
-- **Labels**: Uppercase, tracking-wide, sm size, mb-2
-- **Submit Button**: Full-width or auto-width centered, py-4 px-12
-- **Side Content**: Include contact info (email, phone, address) alongside or above form
+### Store/Seller Dashboard
+- **Overview Cards**: Active Listings, Total Sales, Expiring Soon (grid-cols-1 md:grid-cols-3)
+- **Product Management Table**: Sortable columns (Name, Original Price, Discount, Expiration, Status)
+- **Add Product Form**: Two-column on desktop, image upload prominent, expiration date picker with warning
+- **Quick Actions**: Bulk edit discounts, mark as sold, extend listing
+
+### Buyer Account
+- **Order History**: Cards with product image, purchase date, pickup/delivery status
+- **Favorites Grid**: Same as product grid, heart icon to remove
+- **Saved Searches**: Chips with notification toggle for new matches
+
+### Admin Panel
+- **Order Coordination**: Kanban board (Pending → Confirmed → Ready → Completed)
+- **Logistics View**: Map integration showing delivery routes, filter by area
+- **Vendor Management**: Approval queue, verification status, performance metrics
+- **Analytics Dashboard**: Charts for sales, popular categories, waste reduction stats
+
+### Authentication
+- **Phone Login**: Large input field for phone number, country code dropdown (+244 Angola)
+- **OTP Entry**: 4-6 digit code boxes, auto-focus progression
+- **Profile Setup**: Avatar upload, name, delivery address with map picker
+
+### Checkout Flow
+- **Cart Summary**: Sticky on desktop, product list with quantities, running total
+- **Pickup/Delivery Toggle**: Large radio buttons with icons, delivery fee indication
+- **Address Input**: Autocomplete for known areas in Angola, map confirmation
+- **Payment Methods**: Mobile money (prominent), card (if available), cash on pickup
+- **Confirmation**: Order number large, pickup/delivery details, countdown for pickup window
 
 ### Footer
-- **Layout**: Minimal, single row with copyright + social links
-- **Content**: Left-aligned copyright, right-aligned social icons
-- **Spacing**: py-12 md:py-16
+- **Links**: Categories, About, Sellers, Contact, Terms
+- **Social Proof**: Trust badges, download stats, waste reduction counter
+- **Newsletter**: Single-line email input with submit
 
 ## Images
 
 ### Hero Image
-Large, high-impact architectural photograph featuring completed project. Should establish brand aesthetic immediately. Horizontal orientation, minimum 1920x1080px.
+High-energy photo of diverse fresh products (fruits, bread, dairy) or happy Angolan shoppers with shopping bags. Warm, inviting, natural lighting. Horizontal 16:9, minimum 1600x900px.
 
-### Project Gallery Images
-8-12 high-resolution photographs per project:
-- Exterior shots (daytime, dusk)
-- Interior spaces emphasizing natural light
-- Detail shots (materials, textures)
-- Contextual/landscape integration
-Consistent editing style: warm tones, high clarity, natural light emphasis.
+### Product Images
+Clear, well-lit photos on white/neutral background. Multiple angles for detail page. Consistent square 1:1 aspect ratio for grid uniformity.
 
-### About Section Image
-Professional workspace photo or architect portrait. Authentic, well-lit, shows personality while maintaining professionalism.
+### Category Headers
+Representative product collages for each category (Bakery, Dairy, Produce, etc.). 3:1 wide banner format.
 
-### Image Treatment
-- All images: Lazy loading, WebP format
-- Aspect ratios: Maintain consistency within sections
-- Hover overlays: Semi-transparent with subtle gradients
+### Trust Indicators
+Store verification badges, delivery partner logos, payment method icons.
 
-## Interactions (Minimal)
+## Interactions
 
-- **Smooth scroll**: Between sections, subtle easing
-- **Parallax**: Very subtle on hero (if at all, 0.5 speed)
-- **Image hover**: Scale 1.05, transition 300-400ms
-- **Navigation**: Fade in/out on scroll, smooth transition
-- **No carousels**: Stack images vertically instead
+- **Pull to Refresh**: Product listings on mobile
+- **Countdown Updates**: Live timers tick down, color change at <6 hours
+- **Add to Cart**: Brief success animation, cart badge bounce
+- **Image Zoom**: Pinch on mobile, click on desktop
+- **No Carousels**: Stack images or use horizontal scroll containers instead
 
 ## Page Structure
 
-**Homepage**: Hero → Featured Projects (3-6) → Brief Philosophy Statement → CTA
-**Portfolio**: Filter/Category Nav → Project Grid → Load More (if needed)
-**Project Detail**: Hero Image → Info → Gallery (vertical stack) → Next Project
-**About**: Hero/Image → Bio → Services → Team (if applicable)
-**Contact**: Simple form → Info → Map (optional)
+**Homepage**: Hero → Urgent Deals (expiring <24h) → Categories → Featured Stores → How It Works → Download App CTA
+**Product Listings**: Filter Bar → Product Grid → Load More
+**Product Detail**: Gallery → Info → Seller Details → Similar Products
+**Seller Dashboard**: Stats Overview → Active Listings Table → Add Product
+**Admin**: Orders Kanban → Vendor List → Analytics
+**Checkout**: Cart Review → Delivery/Pickup → Payment → Confirmation
 
 ## Accessibility
-- High contrast text on images (use overlays)
-- Focus states: 2px outline, visible on all interactive elements
-- Alt text for all architectural images with project names
-- Keyboard navigation through all menus and galleries
+- High contrast for countdown timers and pricing
+- Focus states: 2px ring on all inputs and buttons
+- Screen reader labels for icons and discount badges
+- Touch targets minimum 44x44px on mobile

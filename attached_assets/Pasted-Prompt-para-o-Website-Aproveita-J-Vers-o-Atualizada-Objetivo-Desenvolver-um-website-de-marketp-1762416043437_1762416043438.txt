@@ -1,0 +1,58 @@
+Prompt para o Website "Aproveita Já" (Versão Atualizada)
+Objetivo: Desenvolver um website de marketplace para conectar Lojas/Supermercados a Compradores, focado na venda de produtos próximos da data de validade ou excedentes.
+
+I. Interface da Loja/Vendedor (Login e Gestão)
+Registo e Login: Lojas e Supermercados devem usar o Número de Telefone como identificador principal.
+
+Publicação de Produtos: O Vendedor deve ter um painel para listar ofertas de forma rápida, incluindo os seguintes dados obrigatórios:
+
+Nome do Produto.
+
+Preço Original e Preço com Desconto (mínimo 50% de desconto).
+
+Data de Validade (crucial).
+
+Nome da Loja/Supermercado.
+
+Localização Exata do Produto/Loja (Coordenadas GPS ou Endereço Detalhado, visível apenas para o Admin).
+
+Contacto do Supervisor de Logística (Número de telefone, visível apenas para o Admin).
+
+Foto do Produto.
+
+Regra de Expiração Automática: Todos os produtos listados devem desaparecer automaticamente da plataforma 10 dias após a sua publicação, exceto se o Vendedor os renovar manualmente.
+
+II. Interface do Comprador (Marketplace Público)
+Visualização Pública: O utilizador deve ver os produtos, o preço com desconto (incluindo o acréscimo de 15% da Aproveita Já) e o Nome da Loja onde o produto está.
+
+Restrição de Visibilidade: O Comprador NÃO PODE ver o Contacto do Supervisor nem a Localização Exata do Produto/Loja.
+
+Checkout:
+
+Ao finalizar a compra, o Comprador deve ser Obrigado a fazer Login ou Registo.
+
+O Comprador deve fornecer o seu Número de Contacto e a sua Localização Exata (Endereço Atual/Desejado) para a retirada/entrega.
+
+O Comprador deve ter a opção de selecionar "Retirada na Loja" ou "Entrega".
+
+III. Interface do Administrador (Admin)
+Credenciais Fixas de Acesso:
+
+Telefone de Acesso: 9123456789
+
+Senha: 123456789
+
+Painel de Pedidos: O Admin deve ter um painel central para ver todos os pedidos finalizados.
+
+Visibilidade Total do Pedido (Funcionalidade de Coordenação): Ao clicar em um pedido, o Admin deve ver TODAS as informações necessárias para coordenar a logística:
+
+Informação do Comprador: Nome, Número de Contacto e Localização Exata.
+
+O que o Cliente Escolheu (Lista de Produtos).
+
+Informação do Produto/Loja: Nome da Loja, Localização Exata do Produto/Loja e Contacto do Supervisor de Logística.
+
+Função do Admin: O Admin deve usar esta informação para entrar em contacto tanto com o Supervisor da Loja quanto com o Comprador para finalizar os detalhes da transação (logística e pagamento).
+
+Requisito Final:
+O design deve ser mobile-friendly, rápido e otimizado para a usabilidade em Angola.
