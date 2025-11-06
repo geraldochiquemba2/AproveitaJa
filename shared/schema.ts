@@ -58,10 +58,17 @@ export const insertStoreSchema = createInsertSchema(stores).omit({
   id: true,
 });
 
-export const insertProductSchema = createInsertSchema(products).omit({
+const baseInsertProductSchema = createInsertSchema(products).omit({
   id: true,
   createdAt: true,
   isActive: true,
+});
+
+export const insertProductSchema = z.object({
+  ...baseInsertProductSchema.shape,
+  expirationDate: z.union([z.date(), z.string().datetime()]).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
 });
 
 export const insertOrderSchema = createInsertSchema(orders).omit({

@@ -1,5 +1,7 @@
-import { type User, type InsertUser, type Product, type InsertProduct, type Store, type InsertStore, type Order, type InsertOrder } from "@shared/schema";
+import { type User, type InsertUser, type Product, type InsertProduct, type Store, type InsertStore, type Order, type InsertOrder, users, stores, products, orders } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq, and, gt, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -163,4 +165,101 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // Users
+  async getUser(id: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.phone, phone)).limit(1);
+    return result[0];
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  // Stores
+  async getStore(id: string): Promise<Store | undefined> {
+    const result = await db.select().from(stores).where(eq(stores.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getStoresByUserId(userId: string): Promise<Store[]> {
+    return await db.select().from(stores).where(eq(stores.userId, userId));
+  }
+
+  async createStore(insertStore: InsertStore): Promise<Store> {
+    const result = await db.insert(stores).values(insertStore).returning();
+    return result[0];
+  }
+
+  // Products
+  async getProduct(id: string): Promise<Product | undefined> {
+    const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getActiveProducts(): Promise<Product[]> {
+    const tenDaysAgo = new Date();
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    
+    return await db.select()
+      .from(products)
+      .where(
+        and(
+          eq(products.isActive, true),
+          gt(products.createdAt, tenDaysAgo)
+        )
+      );
+  }
+
+  async getProductsByStoreId(storeId: string): Promise<Product[]> {
+    return await db.select().from(products).where(eq(products.storeId, storeId));
+  }
+
+  async createProduct(insertProduct: InsertProduct): Promise<Product> {
+    const result = await db.insert(products).values(insertProduct).returning();
+    return result[0];
+  }
+
+  async updateProduct(id: string, updates: Partial<Product>): Promise<Product | undefined> {
+    const result = await db.update(products)
+      .set(updates)
+      .where(eq(products.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Orders
+  async getOrder(id: string): Promise<Order | undefined> {
+    const result = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return await db.select().from(orders);
+  }
+
+  async getOrdersByBuyerId(buyerId: string): Promise<Order[]> {
+    return await db.select().from(orders).where(eq(orders.buyerId, buyerId));
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const result = await db.insert(orders).values(insertOrder).returning();
+    return result[0];
+  }
+
+  async updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
+    const result = await db.update(orders)
+      .set({ status })
+      .where(eq(orders.id, id))
+      .returning();
+    return result[0];
+  }
+}
+
+export const storage = new DatabaseStorage();
