@@ -5,16 +5,39 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Durante o build (quando NODE_ENV não está definido ou durante bundling),
-// não validamos DATABASE_URL. Só validamos em runtime.
-const databaseUrl = process.env.DATABASE_URL;
+// Lazy initialization - só cria a conexão quando realmente necessário
+let poolInstance: Pool | null = null;
+let dbInstance: ReturnType<typeof drizzle> | null = null;
 
-if (!databaseUrl && process.env.NODE_ENV) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+function getConnectionString(): string {
+  const databaseUrl = process.env.DATABASE_URL;
+  
+  if (!databaseUrl) {
+    throw new Error(
+      "DATABASE_URL must be set. Did you forget to provision a database?",
+    );
+  }
+  
+  return databaseUrl;
 }
 
-// Usa placeholder durante build, será substituído em runtime
-export const pool = new Pool({ connectionString: databaseUrl || "postgresql://placeholder" });
-export const db = drizzle({ client: pool, schema });
+export const pool = new Proxy({} as Pool, {
+  get(_target, prop) {
+    if (!poolInstance) {
+      poolInstance = new Pool({ connectionString: getConnectionString() });
+    }
+    return (poolInstance as any)[prop];
+  }
+});
+
+export const db = new Proxy({} as ReturnType<typeof drizzle>, {
+  get(_target, prop) {
+    if (!dbInstance) {
+      if (!poolInstance) {
+        poolInstance = new Pool({ connectionString: getConnectionString() });
+      }
+      dbInstance = drizzle({ client: poolInstance, schema });
+    }
+    return (dbInstance as any)[prop];
+  }
+});
