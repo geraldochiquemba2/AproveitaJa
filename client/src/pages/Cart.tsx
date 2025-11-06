@@ -76,6 +76,12 @@ export default function Cart() {
                         {parseFloat(item.discountedPrice).toFixed(2)} Kz
                       </p>
                     </div>
+                    <Button
+                      onClick={() => setLocation(`/checkout/${item.id}`)}
+                      data-testid={`button-checkout-${item.id}`}
+                    >
+                      Comprar
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -83,20 +89,15 @@ export default function Cart() {
 
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-lg font-semibold">Total</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-semibold">Total Estimado</span>
                   <span className="text-2xl font-bold text-primary">
                     {total.toFixed(2)} Kz
                   </span>
                 </div>
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={() => setLocation('/checkout')}
-                  data-testid="button-checkout"
-                >
-                  Finalizar Compra
-                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Finalize a compra de cada produto individualmente
+                </p>
               </CardContent>
             </Card>
           </div>
