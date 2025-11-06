@@ -55,6 +55,16 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
                   Início
                 </span>
               </Link>
+              <Link href="/sobre" data-testid="link-about">
+                <span className={`cursor-pointer text-sm font-medium ${location === '/sobre' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
+                  Sobre
+                </span>
+              </Link>
+              <Link href="/contato" data-testid="link-contact">
+                <span className={`cursor-pointer text-sm font-medium ${location === '/contato' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
+                  Contato
+                </span>
+              </Link>
               {user?.role === 'seller' && (
                 <Link href="/vendedor/dashboard" data-testid="link-dashboard">
                   <span className={`cursor-pointer text-sm font-medium ${location === '/vendedor/dashboard' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>

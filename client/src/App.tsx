@@ -11,6 +11,9 @@ import SellerDashboard from "@/pages/SellerDashboard";
 import ProductDetail from "@/pages/ProductDetail";
 import Checkout from "@/pages/Checkout";
 import AdminPanel from "@/pages/AdminPanel";
+import Cart from "@/pages/Cart";
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +26,9 @@ function Router() {
       <Route path="/produto/:id" component={ProductDetail} />
       <Route path="/checkout/:id" component={Checkout} />
       <Route path="/admin" component={AdminPanel} />
+      <Route path="/carrinho" component={Cart} />
+      <Route path="/sobre" component={About} />
+      <Route path="/contato" component={Contact} />
       <Route component={NotFound} />
     </Switch>
   );
