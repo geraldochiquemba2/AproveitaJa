@@ -76,11 +76,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { phone, password } = req.body;
       
+      console.log("Login attempt - Phone:", phone, "Length:", phone?.length);
+      
       if (!phone || !password) {
         return res.status(400).json({ message: "Phone and password are required" });
       }
 
       const user = await storage.getUserByPhone(phone);
+      console.log("User found:", user ? `Yes (${user.phone})` : "No");
       if (!user) {
         return res.status(401).json({ message: "Invalid phone or password" });
       }
