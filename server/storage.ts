@@ -79,7 +79,12 @@ export class MemStorage implements IStorage {
 
   async createStore(insertStore: InsertStore): Promise<Store> {
     const id = randomUUID();
-    const store: Store = { ...insertStore, id };
+    const store: Store = { 
+      ...insertStore, 
+      id,
+      latitude: insertStore.latitude ?? null,
+      longitude: insertStore.longitude ?? null,
+    };
     this.stores.set(id, store);
     return store;
   }

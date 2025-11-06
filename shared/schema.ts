@@ -19,9 +19,11 @@ export const stores = pgTable("stores", {
   userId: varchar("user_id").notNull().references(() => users.id),
   storeName: text("store_name").notNull(),
   supervisorPhone: text("supervisor_phone").notNull(),
+  province: text("province").notNull(),
+  municipality: text("municipality").notNull(),
   address: text("address").notNull(),
-  latitude: text("latitude").notNull(),
-  longitude: text("longitude").notNull(),
+  latitude: text("latitude"),
+  longitude: text("longitude"),
 });
 
 export const products = pgTable("products", {

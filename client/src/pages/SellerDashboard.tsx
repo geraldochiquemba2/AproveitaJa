@@ -17,8 +17,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import MarketplaceNav from '@/components/MarketplaceNav';
 import { useLocation } from 'wouter';
+import { getProvinces, getMunicipalities, type ProvinceName } from '@shared/angola-locations';
 
 export default function SellerDashboard() {
   const { user } = useAuth();
@@ -27,6 +35,8 @@ export default function SellerDashboard() {
   const [storeDialogOpen, setStoreDialogOpen] = useState(false);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [selectedProvince, setSelectedProvince] = useState<ProvinceName | ''>('');
+  const [selectedMunicipality, setSelectedMunicipality] = useState('');
 
   const { data: stores, isLoading: storesLoading } = useQuery<Store[]>({
     queryKey: ['/api/stores/my'],
@@ -44,9 +54,9 @@ export default function SellerDashboard() {
     mutationFn: async (data: {
       storeName: string;
       supervisorPhone: string;
+      province: string;
+      municipality: string;
       address: string;
-      latitude: string;
-      longitude: string;
     }) => {
       const response = await apiRequest('POST', '/api/stores', data);
       return await response.json();
@@ -54,6 +64,8 @@ export default function SellerDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/stores/my'] });
       setStoreDialogOpen(false);
+      setSelectedProvince('');
+      setSelectedMunicipality('');
       toast({ title: 'Loja criada com sucesso!' });
     },
     onError: (error: any) => {
@@ -101,13 +113,23 @@ export default function SellerDashboard() {
 
   const handleStoreSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!selectedProvince || !selectedMunicipality) {
+      toast({ 
+        title: 'Erro', 
+        description: 'Por favor, selecione a província e o município',
+        variant: 'destructive' 
+      });
+      return;
+    }
+    
     const formData = new FormData(e.currentTarget);
     createStoreMutation.mutate({
       storeName: formData.get('storeName') as string,
       supervisorPhone: formData.get('supervisorPhone') as string,
+      province: selectedProvince,
+      municipality: selectedMunicipality,
       address: formData.get('address') as string,
-      latitude: formData.get('latitude') as string,
-      longitude: formData.get('longitude') as string,
     });
   };
 
@@ -181,6 +203,48 @@ export default function SellerDashboard() {
                         data-testid="input-supervisor-phone"
                       />
                     </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="province">Província</Label>
+                        <Select
+                          value={selectedProvince}
+                          onValueChange={(value) => {
+                            setSelectedProvince(value as ProvinceName);
+                            setSelectedMunicipality('');
+                          }}
+                        >
+                          <SelectTrigger id="province" data-testid="select-province">
+                            <SelectValue placeholder="Selecione a província" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getProvinces().map((province) => (
+                              <SelectItem key={province} value={province}>
+                                {province}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="municipality">Município</Label>
+                        <Select
+                          value={selectedMunicipality}
+                          onValueChange={setSelectedMunicipality}
+                          disabled={!selectedProvince}
+                        >
+                          <SelectTrigger id="municipality" data-testid="select-municipality">
+                            <SelectValue placeholder="Selecione o município" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProvince && getMunicipalities(selectedProvince).map((municipality) => (
+                              <SelectItem key={municipality} value={municipality}>
+                                {municipality}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     <div>
                       <Label htmlFor="address">Endereço Completo</Label>
                       <Input
@@ -189,30 +253,6 @@ export default function SellerDashboard() {
                         required
                         data-testid="input-address"
                       />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="latitude">Latitude</Label>
-                        <Input
-                          id="latitude"
-                          name="latitude"
-                          type="text"
-                          placeholder="-8.838333"
-                          required
-                          data-testid="input-latitude"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="longitude">Longitude</Label>
-                        <Input
-                          id="longitude"
-                          name="longitude"
-                          type="text"
-                          placeholder="13.234444"
-                          required
-                          data-testid="input-longitude"
-                        />
-                      </div>
                     </div>
                     <Button
                       type="submit"
