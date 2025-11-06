@@ -126,6 +126,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/products/store/:storeId", async (req: Request, res: Response) => {
+    try {
+      const { storeId } = req.params;
+      const products = await storage.getProductsByStoreId(storeId);
+      res.json(products);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
   app.post("/api/products", requireAuth, await requireRole(["seller", "admin"]), async (req: Request, res: Response) => {
     try {
       const data = insertProductSchema.parse(req.body);

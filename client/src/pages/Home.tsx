@@ -1,86 +1,28 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Product } from "@shared/schema";
 import MarketplaceNav from "@/components/MarketplaceNav";
 import MarketplaceHero from "@/components/MarketplaceHero";
 import CategoryFilter from "@/components/CategoryFilter";
 import ProductCard from "@/components/ProductCard";
+import { Loader2 } from "lucide-react";
 
 import heroImage from '@assets/generated_images/Hero_image_shoppers_Angola_00c6e573.png';
-import bakeryImage from '@assets/generated_images/Bakery_products_showcase_d3685112.png';
-import dairyImage from '@assets/generated_images/Dairy_products_display_4914624c.png';
-import produceImage from '@assets/generated_images/Fresh_produce_assortment_8f0aba1c.png';
-import snacksImage from '@assets/generated_images/Snacks_beverages_products_e98014c5.png';
+
+const MARKETPLACE_FEE = 0.15;
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  const { data: products, isLoading } = useQuery<Product[]>({
+    queryKey: ['/api/products'],
+  });
+
   const categories = ["Padaria", "Laticínios", "Frutas", "Bebidas", "Snacks"];
 
-  const mockProducts = [
-    {
-      id: "1",
-      name: "Pão Fresco Artesanal",
-      originalPrice: 500,
-      discountedPrice: 250,
-      storeName: "Supermercado Central",
-      imageUrl: bakeryImage,
-      expirationDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-      category: "Padaria",
-    },
-    {
-      id: "2",
-      name: "Leite Fresco 1L",
-      originalPrice: 800,
-      discountedPrice: 350,
-      storeName: "Loja do Bairro",
-      imageUrl: dairyImage,
-      expirationDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-      category: "Laticínios",
-    },
-    {
-      id: "3",
-      name: "Mix de Frutas Frescas",
-      originalPrice: 1200,
-      discountedPrice: 500,
-      storeName: "Mercado Verde",
-      imageUrl: produceImage,
-      expirationDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-      category: "Frutas",
-    },
-    {
-      id: "4",
-      name: "Pack Snacks Variados",
-      originalPrice: 1500,
-      discountedPrice: 600,
-      storeName: "Supermercado Popular",
-      imageUrl: snacksImage,
-      expirationDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-      category: "Snacks",
-    },
-    {
-      id: "5",
-      name: "Croissants Frescos",
-      originalPrice: 600,
-      discountedPrice: 280,
-      storeName: "Padaria Moderna",
-      imageUrl: bakeryImage,
-      expirationDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-      category: "Padaria",
-    },
-    {
-      id: "6",
-      name: "Iogurte Natural",
-      originalPrice: 400,
-      discountedPrice: 180,
-      storeName: "Supermercado Central",
-      imageUrl: dairyImage,
-      expirationDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-      category: "Laticínios",
-    },
-  ];
-
   const filteredProducts = selectedCategory
-    ? mockProducts.filter((p) => p.category === selectedCategory)
-    : mockProducts;
+    ? (products || []).filter((p: any) => p.category === selectedCategory)
+    : (products || []);
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -106,15 +48,38 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                {...product}
-                onClick={() => console.log("Product clicked:", product.id)}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {filteredProducts.map((product) => {
+                const discountedPrice = parseFloat(product.discountedPrice);
+                const priceWithFee = discountedPrice * (1 + MARKETPLACE_FEE);
+                
+                return (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    originalPrice={parseFloat(product.originalPrice)}
+                    discountedPrice={priceWithFee}
+                    storeName="Loja"
+                    imageUrl={product.imageUrl}
+                    expirationDate={product.expirationDate.toString()}
+                    onClick={() => console.log("Product clicked:", product.id)}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                Nenhum produto disponível no momento. Volte em breve!
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </div>
