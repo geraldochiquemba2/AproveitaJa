@@ -70,11 +70,24 @@ O plano gratuito inclui:
 - A aplicação hiberna após 15 minutos de inatividade
 - Primeiro acesso pode levar 30-60 segundos (cold start)
 
+### ✨ Sistema Keep-Alive Ativado
+
+Seu site já está configurado com um sistema automático de keep-alive que:
+- ✅ Faz ping automático a cada 10 minutos
+- ✅ Evita hibernação no plano gratuito
+- ✅ Mantém o site sempre ativo
+- ✅ Funciona apenas em produção (não em desenvolvimento)
+
+O sistema usa o endpoint `/api/health` para verificar o status do servidor.
+
+**Nota**: Mesmo com o keep-alive, o Render pode hibernar o serviço se atingir os limites do plano gratuito (750 horas/mês).
+
 ## Upgrade para Plano Pago
 
-Para evitar hibernação e ter melhor performance:
+Para garantir uptime 100% e melhor performance:
 1. Vá em "Settings" no seu web service
 2. Mude o plano de "Free" para "Starter" ($7/mês)
+3. Com plano pago, o keep-alive não é necessário (mas não causa problemas)
 
 ## Troubleshooting
 
