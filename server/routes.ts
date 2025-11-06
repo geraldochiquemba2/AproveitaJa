@@ -184,16 +184,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Store Routes
-  app.get("/api/stores/:id", async (req: Request, res: Response) => {
+  app.get("/api/stores/my", requireAuth, await requireRole(["seller", "admin"]), async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const store = await storage.getStore(id);
-      if (!store) {
-        return res.status(404).json({ message: "Store not found" });
-      }
-      res.json(store);
+      const stores = await storage.getStoresByUserId(req.session.userId!);
+      res.json(stores);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch store" });
+      res.status(500).json({ message: "Failed to fetch stores" });
     }
   });
 
@@ -213,12 +209,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/stores/my", requireAuth, await requireRole(["seller", "admin"]), async (req: Request, res: Response) => {
+  app.get("/api/stores/:id", async (req: Request, res: Response) => {
     try {
-      const stores = await storage.getStoresByUserId(req.session.userId!);
-      res.json(stores);
+      const { id } = req.params;
+      const store = await storage.getStore(id);
+      if (!store) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+      res.json(store);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch stores" });
+      res.status(500).json({ message: "Failed to fetch store" });
     }
   });
 
