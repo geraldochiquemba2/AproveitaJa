@@ -1,15 +1,24 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, User, Home, Package } from "lucide-react";
+import { ShoppingCart, User, Home, Package, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/lib/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface MarketplaceNavProps {
   cartCount?: number;
-  userRole?: string;
 }
 
-export default function MarketplaceNav({ cartCount = 0, userRole }: MarketplaceNavProps) {
-  const [location] = useLocation();
+export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
+  const [location, setLocation] = useLocation();
+  const { user, logout } = useAuth();
 
   return (
     <>
@@ -29,14 +38,14 @@ export default function MarketplaceNav({ cartCount = 0, userRole }: MarketplaceN
                   Início
                 </span>
               </Link>
-              {userRole === 'seller' && (
+              {user?.role === 'seller' && (
                 <Link href="/vendedor/dashboard" data-testid="link-dashboard">
                   <span className={`cursor-pointer text-sm font-medium ${location === '/vendedor/dashboard' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
                     Meus Produtos
                   </span>
                 </Link>
               )}
-              {userRole === 'admin' && (
+              {user?.role === 'admin' && (
                 <Link href="/admin" data-testid="link-admin">
                   <span className={`cursor-pointer text-sm font-medium ${location === '/admin' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
                     Admin
@@ -46,57 +55,100 @@ export default function MarketplaceNav({ cartCount = 0, userRole }: MarketplaceN
             </div>
 
             <div className="flex items-center gap-2">
-              <Link href="/carrinho" data-testid="link-cart">
-                <Button size="icon" variant="ghost" className="relative">
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                      {cartCount}
-                    </Badge>
-                  )}
+              {user && (
+                <Link href="/carrinho" data-testid="link-cart">
+                  <Button size="icon" variant="ghost" className="relative">
+                    <ShoppingCart className="h-5 w-5" />
+                    {cartCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                        {cartCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </Link>
+              )}
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" data-testid="button-user-menu">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+                    <DropdownMenuLabel className="font-normal text-xs text-muted-foreground">
+                      {user.phone}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => logout()} data-testid="button-logout">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sair
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => setLocation('/login')}
+                  data-testid="button-login-nav"
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Entrar
                 </Button>
-              </Link>
-              <Link href="/perfil" data-testid="link-profile">
-                <Button size="icon" variant="ghost">
-                  <User className="h-5 w-5" />
-                </Button>
-              </Link>
+              )}
             </div>
           </div>
         </div>
       </nav>
 
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
-        <div className="grid grid-cols-4 h-16">
+        <div className={`grid h-16 ${user ? 'grid-cols-4' : 'grid-cols-2'}`}>
           <Link href="/" data-testid="link-mobile-home">
             <button className={`flex flex-col items-center justify-center h-full ${location === '/' ? 'text-primary' : 'text-muted-foreground'}`}>
               <Home className="h-5 w-5" />
               <span className="text-xs mt-1">Início</span>
             </button>
           </Link>
-          <Link href="/categorias" data-testid="link-mobile-categories">
-            <button className={`flex flex-col items-center justify-center h-full ${location === '/categorias' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <Package className="h-5 w-5" />
-              <span className="text-xs mt-1">Categorias</span>
+          {user?.role === 'seller' && (
+            <Link href="/vendedor/dashboard" data-testid="link-mobile-dashboard">
+              <button className={`flex flex-col items-center justify-center h-full ${location === '/vendedor/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>
+                <Package className="h-5 w-5" />
+                <span className="text-xs mt-1">Produtos</span>
+              </button>
+            </Link>
+          )}
+          {user && (
+            <Link href="/carrinho" data-testid="link-mobile-cart">
+              <button className={`flex flex-col items-center justify-center h-full relative ${location === '/carrinho' ? 'text-primary' : 'text-muted-foreground'}`}>
+                <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <Badge className="absolute top-2 right-1/4 h-4 w-4 flex items-center justify-center p-0 text-xs">
+                    {cartCount}
+                  </Badge>
+                )}
+                <span className="text-xs mt-1">Carrinho</span>
+              </button>
+            </Link>
+          )}
+          {user ? (
+            <button
+              onClick={() => logout()}
+              className="flex flex-col items-center justify-center h-full text-muted-foreground"
+              data-testid="button-mobile-logout"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-xs mt-1">Sair</span>
             </button>
-          </Link>
-          <Link href="/carrinho" data-testid="link-mobile-cart">
-            <button className={`flex flex-col items-center justify-center h-full relative ${location === '/carrinho' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <Badge className="absolute top-2 right-1/4 h-4 w-4 flex items-center justify-center p-0 text-xs">
-                  {cartCount}
-                </Badge>
-              )}
-              <span className="text-xs mt-1">Carrinho</span>
+          ) : (
+            <button
+              onClick={() => setLocation('/login')}
+              className="flex flex-col items-center justify-center h-full text-muted-foreground"
+              data-testid="button-mobile-login"
+            >
+              <LogIn className="h-5 w-5" />
+              <span className="text-xs mt-1">Entrar</span>
             </button>
-          </Link>
-          <Link href="/perfil" data-testid="link-mobile-profile">
-            <button className={`flex flex-col items-center justify-center h-full ${location === '/perfil' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <User className="h-5 w-5" />
-              <span className="text-xs mt-1">Perfil</span>
-            </button>
-          </Link>
+          )}
         </div>
       </div>
     </>
