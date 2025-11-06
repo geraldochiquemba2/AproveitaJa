@@ -248,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let orders;
       if (user.role === "admin") {
-        orders = await storage.getAllOrders();
+        orders = await storage.getAllOrdersWithDetails();
       } else {
         orders = await storage.getOrdersByBuyerId(req.session.userId!);
       }

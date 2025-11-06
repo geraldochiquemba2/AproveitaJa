@@ -2,7 +2,7 @@ import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { Order, Product, Store } from '@shared/schema';
+import { Order, Product, Store, User } from '@shared/schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,13 +14,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Package, MapPin, Phone, User } from 'lucide-react';
+import { Loader2, Package, MapPin, Phone, User as UserIcon, Store as StoreIcon } from 'lucide-react';
 import MarketplaceNav from '@/components/MarketplaceNav';
 
 type OrderWithDetails = Order & {
-  product?: Product;
-  store?: Store;
-  buyer?: { name: string; phone: string };
+  product: Product;
+  store: Store;
+  buyer: User;
 };
 
 export default function AdminPanel() {
@@ -28,7 +28,7 @@ export default function AdminPanel() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const { data: orders, isLoading } = useQuery<Order[]>({
+  const { data: orders, isLoading } = useQuery<OrderWithDetails[]>({
     queryKey: ['/api/orders'],
     enabled: user?.role === 'admin',
   });
@@ -143,11 +143,18 @@ export default function AdminPanel() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                        <User className="h-4 w-4" />
+                        <UserIcon className="h-4 w-4" />
                         Informações do Comprador
                       </h3>
                       <div className="text-sm space-y-1 text-muted-foreground">
-                        <p><strong>ID:</strong> {order.buyerId}</p>
+                        <p><strong>Nome:</strong> {order.buyer.name}</p>
+                        <p className="flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          <strong>Telefone:</strong> {order.buyer.phone}
+                        </p>
+                        {order.buyer.address && (
+                          <p><strong>Endereço:</strong> {order.buyer.address}</p>
+                        )}
                       </div>
                     </div>
                     <div>
@@ -156,8 +163,20 @@ export default function AdminPanel() {
                         Detalhes do Produto
                       </h3>
                       <div className="text-sm space-y-1 text-muted-foreground">
-                        <p><strong>ID:</strong> {order.productId}</p>
+                        <p><strong>Nome:</strong> {order.product.name}</p>
                         <p><strong>Quantidade:</strong> {order.quantity}</p>
+                        <p>
+                          <strong>Preço Original:</strong>{' '}
+                          <span className="line-through">
+                            {parseFloat(order.product.originalPrice).toFixed(2)} Kz
+                          </span>
+                        </p>
+                        <p>
+                          <strong>Preço com Desconto:</strong>{' '}
+                          <span className="text-primary font-semibold">
+                            {parseFloat(order.product.discountedPrice).toFixed(2)} Kz
+                          </span>
+                        </p>
                         <p>
                           <strong>Total:</strong>{' '}
                           <span className="text-primary font-semibold">
@@ -168,24 +187,49 @@ export default function AdminPanel() {
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Informações de Entrega
-                    </h3>
-                    <div className="text-sm space-y-1 text-muted-foreground">
-                      <p>
-                        <strong>Tipo:</strong>{' '}
-                        {order.deliveryType === 'delivery' ? 'Entrega' : 'Retirada'}
-                      </p>
-                      {order.deliveryType === 'delivery' && order.deliveryAddress && (
-                        <>
-                          <p><strong>Endereço:</strong> {order.deliveryAddress}</p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                        <StoreIcon className="h-4 w-4" />
+                        Informações da Loja
+                      </h3>
+                      <div className="text-sm space-y-1 text-muted-foreground">
+                        <p><strong>Nome:</strong> {order.store.storeName}</p>
+                        <p className="flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          <strong>Supervisor:</strong> {order.store.supervisorPhone}
+                        </p>
+                        <p><strong>Província:</strong> {order.store.province}</p>
+                        <p><strong>Município:</strong> {order.store.municipality}</p>
+                        <p><strong>Endereço:</strong> {order.store.address}</p>
+                        {order.store.latitude && order.store.longitude && (
                           <p>
-                            <strong>Coordenadas:</strong> {order.deliveryLatitude}, {order.deliveryLongitude}
+                            <strong>Coordenadas:</strong> {order.store.latitude}, {order.store.longitude}
                           </p>
-                        </>
-                      )}
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Informações de Entrega
+                      </h3>
+                      <div className="text-sm space-y-1 text-muted-foreground">
+                        <p>
+                          <strong>Tipo:</strong>{' '}
+                          {order.deliveryType === 'delivery' ? 'Entrega' : 'Retirada'}
+                        </p>
+                        {order.deliveryType === 'delivery' && order.deliveryAddress && (
+                          <>
+                            <p><strong>Endereço:</strong> {order.deliveryAddress}</p>
+                            {order.deliveryLatitude && order.deliveryLongitude && (
+                              <p>
+                                <strong>Coordenadas:</strong> {order.deliveryLatitude}, {order.deliveryLongitude}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
 

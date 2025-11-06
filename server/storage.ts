@@ -4,6 +4,12 @@ import { db } from "./db";
 import { eq, and, gt, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
+export type OrderWithDetails = Order & {
+  buyer: User;
+  product: Product;
+  store: Store;
+};
+
 export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
@@ -25,6 +31,7 @@ export interface IStorage {
   // Orders
   getOrder(id: string): Promise<Order | undefined>;
   getAllOrders(): Promise<Order[]>;
+  getAllOrdersWithDetails(): Promise<OrderWithDetails[]>;
   getOrdersByBuyerId(buyerId: string): Promise<Order[]>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
@@ -141,6 +148,28 @@ export class MemStorage implements IStorage {
     return Array.from(this.orders.values());
   }
 
+  async getAllOrdersWithDetails(): Promise<OrderWithDetails[]> {
+    const allOrders = Array.from(this.orders.values());
+    const ordersWithDetails: OrderWithDetails[] = [];
+
+    for (const order of allOrders) {
+      const buyer = await this.getUser(order.buyerId);
+      const product = await this.getProduct(order.productId);
+      const store = product ? await this.getStore(product.storeId) : undefined;
+
+      if (buyer && product && store) {
+        ordersWithDetails.push({
+          ...order,
+          buyer,
+          product,
+          store,
+        });
+      }
+    }
+
+    return ordersWithDetails;
+  }
+
   async getOrdersByBuyerId(buyerId: string): Promise<Order[]> {
     return Array.from(this.orders.values()).filter(
       (order) => order.buyerId === buyerId
@@ -254,6 +283,27 @@ export class DatabaseStorage implements IStorage {
 
   async getAllOrders(): Promise<Order[]> {
     return await db.select().from(orders);
+  }
+
+  async getAllOrdersWithDetails(): Promise<OrderWithDetails[]> {
+    const allOrders = await db
+      .select({
+        order: orders,
+        buyer: users,
+        product: products,
+        store: stores,
+      })
+      .from(orders)
+      .innerJoin(users, eq(orders.buyerId, users.id))
+      .innerJoin(products, eq(orders.productId, products.id))
+      .innerJoin(stores, eq(products.storeId, stores.id));
+
+    return allOrders.map((row) => ({
+      ...row.order,
+      buyer: row.buyer,
+      product: row.product,
+      store: row.store,
+    }));
   }
 
   async getOrdersByBuyerId(buyerId: string): Promise<Order[]> {
