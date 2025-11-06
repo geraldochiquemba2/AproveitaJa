@@ -5,11 +5,16 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-if (!process.env.DATABASE_URL) {
+// Durante o build (quando NODE_ENV não está definido ou durante bundling),
+// não validamos DATABASE_URL. Só validamos em runtime.
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl && process.env.NODE_ENV) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Usa placeholder durante build, será substituído em runtime
+export const pool = new Pool({ connectionString: databaseUrl || "postgresql://placeholder" });
 export const db = drizzle({ client: pool, schema });
