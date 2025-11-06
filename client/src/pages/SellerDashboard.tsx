@@ -37,6 +37,8 @@ export default function SellerDashboard() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<ProvinceName | ''>('');
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
+  const [productProvince, setProductProvince] = useState<ProvinceName | ''>('');
+  const [productMunicipality, setProductMunicipality] = useState('');
   const [productLocation, setProductLocation] = useState({ latitude: '', longitude: '' });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
@@ -83,6 +85,8 @@ export default function SellerDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products/store', store?.id] });
       setProductDialogOpen(false);
+      setProductProvince('');
+      setProductMunicipality('');
       setProductLocation({ latitude: '', longitude: '' });
       toast({ title: 'Produto adicionado com sucesso!' });
     },
@@ -132,6 +136,15 @@ export default function SellerDashboard() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    if (!productProvince || !productMunicipality) {
+      toast({ 
+        title: 'Erro', 
+        description: 'Por favor, selecione a província e o município',
+        variant: 'destructive' 
+      });
+      return;
+    }
+    
     const imageFile = formData.get('image') as File;
     if (!imageFile) {
       toast({ 
@@ -153,6 +166,8 @@ export default function SellerDashboard() {
         discountedPrice: formData.get('discountedPrice') as string,
         expirationDate: new Date(formData.get('expirationDate') as string).toISOString(),
         imageUrl: base64String,
+        province: productProvince,
+        municipality: productMunicipality,
         latitude: formData.get('latitude') as string,
         longitude: formData.get('longitude') as string,
         supervisorPhone: formData.get('supervisorPhone') as string,
@@ -433,6 +448,44 @@ export default function SellerDashboard() {
                     data-testid="input-supervisor-phone"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="productProvince">Província</Label>
+                  <Select 
+                    value={productProvince} 
+                    onValueChange={(value) => {
+                      setProductProvince(value as ProvinceName);
+                      setProductMunicipality('');
+                    }}
+                  >
+                    <SelectTrigger id="productProvince" data-testid="select-product-province">
+                      <SelectValue placeholder="Selecione a província" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getProvinces().map((province) => (
+                        <SelectItem key={province} value={province}>
+                          {province}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {productProvince && (
+                  <div>
+                    <Label htmlFor="productMunicipality">Município</Label>
+                    <Select value={productMunicipality} onValueChange={setProductMunicipality}>
+                      <SelectTrigger id="productMunicipality" data-testid="select-product-municipality">
+                        <SelectValue placeholder="Selecione o município" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getMunicipalities(productProvince).map((municipality) => (
+                          <SelectItem key={municipality} value={municipality}>
+                            {municipality}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label>Localização do Produto</Label>
