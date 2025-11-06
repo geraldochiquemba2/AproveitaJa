@@ -34,6 +34,9 @@ export const products = pgTable("products", {
   discountedPrice: decimal("discounted_price", { precision: 10, scale: 2 }).notNull(),
   expirationDate: timestamp("expiration_date").notNull(),
   imageUrl: text("image_url").notNull(),
+  latitude: text("latitude").notNull(),
+  longitude: text("longitude").notNull(),
+  supervisorPhone: text("supervisor_phone").notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   isActive: boolean("is_active").notNull().default(true),
 });

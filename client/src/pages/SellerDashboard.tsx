@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Edit, Trash2, Store as StoreIcon } from 'lucide-react';
+import { Loader2, Plus, Edit, Trash2, Store as StoreIcon, MapPin } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,8 @@ export default function SellerDashboard() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<ProvinceName | ''>('');
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
+  const [productLocation, setProductLocation] = useState({ latitude: '', longitude: '' });
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const { data: stores, isLoading: storesLoading } = useQuery<Store[]>({
     queryKey: ['/api/stores/my'],
@@ -74,21 +76,14 @@ export default function SellerDashboard() {
   });
 
   const createProductMutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      const productData = {
-        storeId: store!.id,
-        name: data.get('name') as string,
-        originalPrice: data.get('originalPrice') as string,
-        discountedPrice: data.get('discountedPrice') as string,
-        expirationDate: new Date(data.get('expirationDate') as string).toISOString(),
-        imageUrl: data.get('imageUrl') as string,
-      };
+    mutationFn: async (productData: any) => {
       const response = await apiRequest('POST', '/api/products', productData);
       return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products/store', store?.id] });
       setProductDialogOpen(false);
+      setProductLocation({ latitude: '', longitude: '' });
       toast({ title: 'Produto adicionado com sucesso!' });
     },
     onError: (error: any) => {
@@ -133,14 +128,75 @@ export default function SellerDashboard() {
     });
   };
 
-  const handleProductSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleProductSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    createProductMutation.mutate(formData);
+    
+    const imageFile = formData.get('image') as File;
+    if (!imageFile) {
+      toast({ 
+        title: 'Erro', 
+        description: 'Por favor, selecione uma imagem',
+        variant: 'destructive' 
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      
+      const productData = {
+        storeId: store!.id,
+        name: formData.get('name') as string,
+        originalPrice: formData.get('originalPrice') as string,
+        discountedPrice: formData.get('discountedPrice') as string,
+        expirationDate: new Date(formData.get('expirationDate') as string).toISOString(),
+        imageUrl: base64String,
+        latitude: formData.get('latitude') as string,
+        longitude: formData.get('longitude') as string,
+        supervisorPhone: formData.get('supervisorPhone') as string,
+      };
+      
+      createProductMutation.mutate(productData);
+    };
+    
+    reader.readAsDataURL(imageFile);
   };
 
   const handleDeactivateProduct = (id: string) => {
     updateProductMutation.mutate({ id, data: { isActive: false } });
+  };
+
+  const handleGetCurrentLocation = () => {
+    setIsGettingLocation(true);
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setProductLocation({
+            latitude: position.coords.latitude.toFixed(6),
+            longitude: position.coords.longitude.toFixed(6),
+          });
+          setIsGettingLocation(false);
+          toast({ title: 'Localização capturada com sucesso!' });
+        },
+        (error) => {
+          setIsGettingLocation(false);
+          toast({
+            title: 'Erro ao obter localização',
+            description: 'Verifique se permitiu acesso à localização',
+            variant: 'destructive',
+          });
+        }
+      );
+    } else {
+      setIsGettingLocation(false);
+      toast({
+        title: 'Geolocalização não suportada',
+        description: 'Seu navegador não suporta geolocalização',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (user?.role !== 'seller') {
@@ -351,15 +407,84 @@ export default function SellerDashboard() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="imageUrl">URL da Imagem</Label>
+                  <Label htmlFor="image">Foto do Produto</Label>
                   <Input
-                    id="imageUrl"
-                    name="imageUrl"
-                    type="url"
-                    placeholder="https://exemplo.com/imagem.jpg"
+                    id="image"
+                    name="image"
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
                     required
-                    data-testid="input-image-url"
+                    data-testid="input-product-image"
+                    className="cursor-pointer"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Tire uma foto ou selecione do dispositivo
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="supervisorPhone">Telefone do Supervisor</Label>
+                  <Input
+                    id="supervisorPhone"
+                    name="supervisorPhone"
+                    type="tel"
+                    placeholder="+244 923 456 789"
+                    required
+                    data-testid="input-supervisor-phone"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label>Localização do Produto</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGetCurrentLocation}
+                      disabled={isGettingLocation}
+                      data-testid="button-get-location"
+                    >
+                      {isGettingLocation ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Obtendo...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="mr-2 h-3 w-3" />
+                          Usar GPS
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Input
+                        id="latitude"
+                        name="latitude"
+                        type="text"
+                        placeholder="-8.838333"
+                        value={productLocation.latitude}
+                        onChange={(e) => setProductLocation({ ...productLocation, latitude: e.target.value })}
+                        required
+                        data-testid="input-product-latitude"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Latitude</p>
+                    </div>
+                    <div>
+                      <Input
+                        id="longitude"
+                        name="longitude"
+                        type="text"
+                        placeholder="13.234444"
+                        value={productLocation.longitude}
+                        onChange={(e) => setProductLocation({ ...productLocation, longitude: e.target.value })}
+                        required
+                        data-testid="input-product-longitude"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Longitude</p>
+                    </div>
+                  </div>
                 </div>
                 <Button
                   type="submit"
