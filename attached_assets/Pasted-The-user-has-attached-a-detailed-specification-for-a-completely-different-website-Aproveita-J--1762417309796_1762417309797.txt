@@ -1,0 +1,33 @@
+The user has attached a detailed specification for a completely different website - "Aproveita Já" - which is a marketplace for selling products near expiration date. This is NOT the architecture portfolio website I just created.
+
+I need to:
+
+Understand that the user wants me to build this new marketplace website instead
+This is a complete pivot from the architecture portfolio
+I should clarify with the user if they want me to replace the current website or if this is a different project
+Let me read the requirements carefully:
+
+Marketplace connecting Stores/Supermarkets to Buyers
+Focus on products near expiration or surplus
+Store/Seller interface with login via phone number
+Product listing with mandatory fields (name, original/discounted price, expiration date, store name, exact location, logistics supervisor contact, photo)
+Auto-expiration: products disappear 10 days after listing
+Buyer interface - public marketplace
+Buyers see products, discounted price (+15% fee), store name
+Buyers DON'T see supervisor contact or exact location
+Checkout requires login/registration with phone and exact location
+Option for pickup or delivery
+Admin interface with fixed credentials (phone: 9123456789, password: 123456789)
+Admin sees all orders with full details for logistics coordination
+Mobile-friendly, optimized for Angola
+This is a complex marketplace application with three different user roles (Store/Seller, Buyer, Admin) and requires authentication, product management, order management, and logistics coordination.
+
+I should ask the user if they want me to:
+
+Replace the architecture portfolio with this marketplace
+Start fresh with this new project
+Actually, looking at the context, the user provided this specification directly, so they clearly want me to build this instead of the architecture portfolio. I should acknowledge what they want and start building it.
+
+Let me create a new plan for this marketplace application.
+
+Entendo! Você quer criar o marketplace "Aproveita Já" em vez do site de arquitetura. Vou desenvolver este marketplace para conectar lojas/supermercados a compradores, com foco em produtos próximos da validade. O sistema terá três interfaces distintas: Vendedor (lojas), Comprador (público) e Administrador (coordenação logística).
