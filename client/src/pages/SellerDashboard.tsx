@@ -171,6 +171,7 @@ export default function SellerDashboard() {
         province: productProvince,
         municipality: productMunicipality,
         supervisorPhone: formData.get('supervisorPhone') as string,
+        stockQuantity: formData.get('stockQuantity') as string,
       };
       
       createProductMutation.mutate(productData);
@@ -410,6 +411,19 @@ export default function SellerDashboard() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="stockQuantity">Quantidade em Estoque</Label>
+                  <Input
+                    id="stockQuantity"
+                    name="stockQuantity"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Ex: 100"
+                    required
+                    data-testid="input-stock-quantity"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="image">Foto do Produto</Label>
                   <Input
                     id="image"
@@ -528,7 +542,13 @@ export default function SellerDashboard() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm">
+                      <p className="text-muted-foreground">Estoque</p>
+                      <p className="font-semibold" data-testid={`stock-${product.id}`}>
+                        {parseFloat(product.stockQuantity).toFixed(0)} unidades
+                      </p>
+                    </div>
                     <span
                       className={`text-xs px-2 py-1 rounded ${
                         product.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'

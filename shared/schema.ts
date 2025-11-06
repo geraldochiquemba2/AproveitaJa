@@ -37,6 +37,7 @@ export const products = pgTable("products", {
   province: text("province").notNull(),
   municipality: text("municipality").notNull(),
   supervisorPhone: text("supervisor_phone").notNull(),
+  stockQuantity: decimal("stock_quantity", { precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   isActive: boolean("is_active").notNull().default(true),
 });
