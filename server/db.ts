@@ -1,43 +1,41 @@
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
+import type { NeonDatabase } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Lazy initialization - só cria a conexão quando realmente necessário
-let poolInstance: Pool | null = null;
-let dbInstance: ReturnType<typeof drizzle> | null = null;
+let poolInstance: Pool | undefined;
+let dbInstance: NeonDatabase<typeof schema> | undefined;
 
-function getConnectionString(): string {
-  const databaseUrl = process.env.DATABASE_URL;
-  
-  if (!databaseUrl) {
-    throw new Error(
-      "DATABASE_URL must be set. Did you forget to provision a database?",
-    );
+export function getPool(): Pool {
+  if (!poolInstance) {
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      throw new Error("DATABASE_URL must be set. Did you forget to provision a database?");
+    }
+    poolInstance = new Pool({ connectionString: databaseUrl });
   }
-  
-  return databaseUrl;
+  return poolInstance;
 }
 
+export function getDb(): NeonDatabase<typeof schema> {
+  if (!dbInstance) {
+    dbInstance = drizzle({ client: getPool(), schema });
+  }
+  return dbInstance;
+}
+
+// Para compatibilidade com código existente
 export const pool = new Proxy({} as Pool, {
   get(_target, prop) {
-    if (!poolInstance) {
-      poolInstance = new Pool({ connectionString: getConnectionString() });
-    }
-    return (poolInstance as any)[prop];
+    return (getPool() as any)[prop];
   }
 });
 
-export const db = new Proxy({} as ReturnType<typeof drizzle>, {
+export const db = new Proxy({} as NeonDatabase<typeof schema>, {
   get(_target, prop) {
-    if (!dbInstance) {
-      if (!poolInstance) {
-        poolInstance = new Pool({ connectionString: getConnectionString() });
-      }
-      dbInstance = drizzle({ client: poolInstance, schema });
-    }
-    return (dbInstance as any)[prop];
+    return (getDb() as any)[prop];
   }
 });
