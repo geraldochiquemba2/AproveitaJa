@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { insertUserSchema, insertProductSchema, insertStoreSchema, insertOrderSchema, type User } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
+import bcrypt from "bcryptjs";
 
 declare module "express-session" {
   interface SessionData {
@@ -80,7 +81,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUserByPhone(phone);
-      if (!user || user.password !== password) {
+      if (!user) {
+        return res.status(401).json({ message: "Invalid phone or password" });
+      }
+
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
         return res.status(401).json({ message: "Invalid phone or password" });
       }
 
@@ -126,6 +132,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/products/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const product = await storage.getProduct(id);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json(product);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch product" });
+    }
+  });
+
   app.get("/api/products/store/:storeId", async (req: Request, res: Response) => {
     try {
       const { storeId } = req.params;
@@ -165,6 +184,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Store Routes
+  app.get("/api/stores/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const store = await storage.getStore(id);
+      if (!store) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+      res.json(store);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch store" });
+    }
+  });
+
   app.post("/api/stores", requireAuth, await requireRole(["seller", "admin"]), async (req: Request, res: Response) => {
     try {
       const data = insertStoreSchema.parse({

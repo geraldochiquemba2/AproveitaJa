@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Product } from "@shared/schema";
 import MarketplaceNav from "@/components/MarketplaceNav";
 import MarketplaceHero from "@/components/MarketplaceHero";
@@ -13,6 +14,7 @@ const MARKETPLACE_FEE = 0.15;
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [, setLocation] = useLocation();
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products'],
@@ -68,7 +70,7 @@ export default function Home() {
                     storeName="Loja"
                     imageUrl={product.imageUrl}
                     expirationDate={product.expirationDate.toString()}
-                    onClick={() => console.log("Product clicked:", product.id)}
+                    onClick={() => setLocation(`/produto/${product.id}`)}
                   />
                 );
               })}

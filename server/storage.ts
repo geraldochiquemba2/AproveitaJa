@@ -2,6 +2,7 @@ import { type User, type InsertUser, type Product, type InsertProduct, type Stor
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, and, gt, sql } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   // Users
@@ -53,9 +54,11 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
     const user: User = {
       ...insertUser,
       id,
+      password: hashedPassword,
       role: insertUser.role ?? "buyer",
       address: insertUser.address ?? null,
       latitude: insertUser.latitude ?? null,
@@ -178,7 +181,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(insertUser).returning();
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    const result = await db.insert(users).values({
+      ...insertUser,
+      password: hashedPassword,
+    }).returning();
     return result[0];
   }
 

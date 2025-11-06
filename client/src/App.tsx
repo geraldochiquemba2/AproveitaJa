@@ -8,6 +8,9 @@ import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import SellerDashboard from "@/pages/SellerDashboard";
+import ProductDetail from "@/pages/ProductDetail";
+import Checkout from "@/pages/Checkout";
+import AdminPanel from "@/pages/AdminPanel";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,6 +20,9 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/registro" component={Register} />
       <Route path="/vendedor/dashboard" component={SellerDashboard} />
+      <Route path="/produto/:id" component={ProductDetail} />
+      <Route path="/checkout/:id" component={Checkout} />
+      <Route path="/admin" component={AdminPanel} />
       <Route component={NotFound} />
     </Switch>
   );
