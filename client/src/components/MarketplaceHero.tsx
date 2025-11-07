@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface MarketplaceHeroProps {
   imageSrc: string;
@@ -16,6 +16,7 @@ const videos = [
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,15 +27,30 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
     setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
   };
 
+  useEffect(() => {
+    videos.forEach((_, index) => {
+      const video = videoRefs.current[index];
+      if (!video) return;
+
+      if (index === currentVideoIndex) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+        video.currentTime = 0;
+      }
+    });
+  }, [currentVideoIndex]);
+
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-black">
       {videos.map((video, index) => (
         <video
           key={video}
-          autoPlay={index === currentVideoIndex}
+          ref={(el) => (videoRefs.current[index] = el)}
           muted
           playsInline
           preload="auto"
+          autoPlay={index === 0}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
             index === currentVideoIndex ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
