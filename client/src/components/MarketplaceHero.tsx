@@ -16,79 +16,47 @@ const videos = [heroVideo1, heroVideo2, heroVideo3];
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [nextVideoIndex, setNextVideoIndex] = useState(1);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const transitionStarted = useRef(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch?.(searchQuery);
   };
 
-  const handleTimeUpdate = (index: number) => {
-    const video = videoRefs.current[index];
-    if (!video || index !== currentVideoIndex) return;
-
-    const timeRemaining = video.duration - video.currentTime;
-    
-    if (timeRemaining <= 1.5 && !transitionStarted.current) {
-      transitionStarted.current = true;
-      const nextIndex = (currentVideoIndex + 1) % videos.length;
-      const nextVideo = videoRefs.current[nextIndex];
-      
-      if (nextVideo) {
-        nextVideo.currentTime = 0;
-        nextVideo.play().catch(() => {});
-      }
-      
-      setNextVideoIndex(nextIndex);
-    }
-  };
-
-  const handleVideoEnded = (index: number) => {
-    if (index === currentVideoIndex) {
-      transitionStarted.current = false;
-      setCurrentVideoIndex(nextVideoIndex);
-    }
+  const handleVideoEnded = () => {
+    const nextIndex = (currentVideoIndex + 1) % videos.length;
+    setCurrentVideoIndex(nextIndex);
   };
 
   useEffect(() => {
-    videos.forEach((_, index) => {
-      const video = videoRefs.current[index];
-      if (!video) return;
+    const video = videoRef.current;
+    if (!video) return;
 
-      video.load();
-      
-      if (index === currentVideoIndex) {
-        video.play().catch(() => {});
-      } else if (index !== nextVideoIndex) {
-        video.pause();
-        video.currentTime = 0;
+    const playVideo = async () => {
+      try {
+        video.load();
+        await video.play();
+      } catch (error) {
+        console.log("Autoplay prevented:", error);
       }
-    });
-  }, [currentVideoIndex, nextVideoIndex]);
+    };
+
+    playVideo();
+  }, [currentVideoIndex]);
 
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-black">
-      {videos.map((video, index) => (
-        <video
-          key={video}
-          ref={(el) => (videoRefs.current[index] = el)}
-          muted
-          playsInline
-          preload="auto"
-          autoPlay={index === 0}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            index === currentVideoIndex || index === nextVideoIndex 
-              ? "opacity-100 z-10" 
-              : "opacity-0 z-0"
-          }`}
-          onTimeUpdate={() => handleTimeUpdate(index)}
-          onEnded={() => handleVideoEnded(index)}
-        >
-          <source src={video} type="video/mp4" />
-        </video>
-      ))}
+      <video
+        ref={videoRef}
+        muted
+        playsInline
+        autoPlay
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover"
+        onEnded={handleVideoEnded}
+      >
+        <source src={videos[currentVideoIndex]} type="video/mp4" />
+      </video>
       
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-20" />
 
