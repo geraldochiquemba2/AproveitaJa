@@ -16,47 +16,62 @@ const videos = [heroVideo1, heroVideo2, heroVideo3];
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [activePlayer, setActivePlayer] = useState<0 | 1>(0);
+  const videoRef1 = useRef<HTMLVideoElement | null>(null);
+  const videoRef2 = useRef<HTMLVideoElement | null>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch?.(searchQuery);
   };
 
-  const handleVideoEnded = () => {
+  const handleVideoEnded = (player: 0 | 1) => {
+    if (player !== activePlayer) return;
+    
     const nextIndex = (currentVideoIndex + 1) % videos.length;
-    setCurrentVideoIndex(nextIndex);
+    const nextPlayer = activePlayer === 0 ? 1 : 0;
+    const nextVideo = nextPlayer === 0 ? videoRef1.current : videoRef2.current;
+    
+    if (nextVideo) {
+      nextVideo.src = videos[nextIndex];
+      nextVideo.load();
+      nextVideo.play().then(() => {
+        setActivePlayer(nextPlayer);
+        setCurrentVideoIndex(nextIndex);
+      }).catch(() => {});
+    }
   };
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const playVideo = async () => {
-      try {
-        video.load();
-        await video.play();
-      } catch (error) {
-        console.log("Autoplay prevented:", error);
-      }
-    };
-
-    playVideo();
-  }, [currentVideoIndex]);
+    const video1 = videoRef1.current;
+    if (video1 && activePlayer === 0) {
+      video1.src = videos[currentVideoIndex];
+      video1.load();
+      video1.play().catch(() => {});
+    }
+  }, []);
 
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-black">
       <video
-        ref={videoRef}
+        ref={videoRef1}
         muted
         playsInline
-        autoPlay
-        preload="auto"
-        className="absolute inset-0 w-full h-full object-cover"
-        onEnded={handleVideoEnded}
-      >
-        <source src={videos[currentVideoIndex]} type="video/mp4" />
-      </video>
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+          activePlayer === 0 ? "opacity-100 z-10" : "opacity-0 z-0"
+        }`}
+        onEnded={() => handleVideoEnded(0)}
+      />
+      
+      <video
+        ref={videoRef2}
+        muted
+        playsInline
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+          activePlayer === 1 ? "opacity-100 z-10" : "opacity-0 z-0"
+        }`}
+        onEnded={() => handleVideoEnded(1)}
+      />
       
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-20" />
 
