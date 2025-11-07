@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 
 interface MarketplaceHeroProps {
   imageSrc: string;
@@ -15,10 +15,7 @@ const videos = [
 
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const [videoError, setVideoError] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,41 +26,19 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
     setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
   };
 
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      videoRef.current.play().catch(() => {});
-    }
-  }, [currentVideoIndex]);
-
   return (
-    <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
-      <img
-        src={imageSrc}
-        alt="Marketplace"
-        loading="eager"
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-          videoLoaded && !videoError ? "opacity-0" : "opacity-100"
-        }`}
-      />
-      
-      {!videoError && (
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          preload="metadata"
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-            videoLoaded ? "opacity-100" : "opacity-0"
-          }`}
-          onLoadedData={() => setVideoLoaded(true)}
-          onError={() => setVideoError(true)}
-          onEnded={handleVideoEnded}
-        >
-          <source src={videos[currentVideoIndex]} type="video/mp4" />
-        </video>
-      )}
+    <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-black">
+      <video
+        key={currentVideoIndex}
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover"
+        onEnded={handleVideoEnded}
+      >
+        <source src={videos[currentVideoIndex]} type="video/mp4" />
+      </video>
       
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
 
