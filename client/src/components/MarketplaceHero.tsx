@@ -28,21 +28,25 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
 
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-black">
-      <video
-        key={currentVideoIndex}
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        className="absolute inset-0 w-full h-full object-cover"
-        onEnded={handleVideoEnded}
-      >
-        <source src={videos[currentVideoIndex]} type="video/mp4" />
-      </video>
+      {videos.map((video, index) => (
+        <video
+          key={video}
+          autoPlay={index === currentVideoIndex}
+          muted
+          playsInline
+          preload="auto"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            index === currentVideoIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+          }`}
+          onEnded={index === currentVideoIndex ? handleVideoEnded : undefined}
+        >
+          <source src={video} type="video/mp4" />
+        </video>
+      ))}
       
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-20" />
 
-      <div className="relative h-full flex items-center justify-center px-4">
+      <div className="relative h-full flex items-center justify-center px-4 z-30">
         <div className="max-w-3xl w-full text-center">
           <h1
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4"
