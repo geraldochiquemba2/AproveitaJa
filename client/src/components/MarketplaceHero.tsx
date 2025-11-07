@@ -25,7 +25,7 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
         playsInline
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="https://videos.pexels.com/video-files/3209828/3209828-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+        <source src="https://videos.pexels.com/video-files/6169310/6169310-uhd_2560_1440_30fps.mp4" type="video/mp4" />
       </video>
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
 
