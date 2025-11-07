@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import heroVideo from "@assets/5100067-uhd_3840_2160_30fps (1)_1762556001985.mp4";
+import heroVideo from "@assets/hero-video-compressed.mp4";
 
 interface MarketplaceHeroProps {
   imageSrc: string;
@@ -24,7 +24,7 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
         loop
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         className="absolute inset-0 w-full h-full object-cover"
       >
         <source src={heroVideo} type="video/mp4" />
