@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface MarketplaceHeroProps {
   imageSrc: string;
@@ -27,11 +27,14 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
 
   const handleVideoEnded = () => {
     setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+  };
+
+  useEffect(() => {
     if (videoRef.current) {
       videoRef.current.load();
       videoRef.current.play().catch(() => {});
     }
-  };
+  }, [currentVideoIndex]);
 
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
