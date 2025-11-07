@@ -1,64 +1,29 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import heroImage from "@assets/stock_images/grocery_store_superm_a96e0ad9.jpg";
 
 interface MarketplaceHeroProps {
   imageSrc: string;
   onSearch?: (query: string) => void;
 }
 
-const videos = [
-  "/videos/marketplace.mp4",
-  "/videos/marketplace2.mp4"
-];
-
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch?.(searchQuery);
   };
 
-  const handleVideoEnded = () => {
-    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
-  };
-
-  useEffect(() => {
-    videos.forEach((_, index) => {
-      const video = videoRefs.current[index];
-      if (!video) return;
-
-      if (index === currentVideoIndex) {
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-        video.currentTime = 0;
-      }
-    });
-  }, [currentVideoIndex]);
-
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-black">
-      {videos.map((video, index) => (
-        <video
-          key={video}
-          ref={(el) => (videoRefs.current[index] = el)}
-          muted
-          playsInline
-          preload="auto"
-          autoPlay={index === 0}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            index === currentVideoIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-          }`}
-          onEnded={index === currentVideoIndex ? handleVideoEnded : undefined}
-        >
-          <source src={video} type="video/mp4" />
-        </video>
-      ))}
+      <img
+        src={heroImage}
+        alt="Marketplace"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
       
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-20" />
 
