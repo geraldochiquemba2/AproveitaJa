@@ -1,34 +1,64 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import heroVideo from "@assets/hero-video-compressed.mp4";
+import { useState, useRef, useEffect } from "react";
+import heroVideo1 from "@assets/hero-video-compressed.mp4";
+import heroVideo2 from "@assets/hero-video-2-compressed.mp4";
+import heroVideo3 from "@assets/hero-video-3-compressed.mp4";
 
 interface MarketplaceHeroProps {
   imageSrc: string;
   onSearch?: (query: string) => void;
 }
 
+const videos = [heroVideo1, heroVideo2, heroVideo3];
+
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch?.(searchQuery);
   };
 
+  const handleVideoEnded = () => {
+    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+  };
+
+  useEffect(() => {
+    videos.forEach((_, index) => {
+      const video = videoRefs.current[index];
+      if (!video) return;
+
+      if (index === currentVideoIndex) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+        video.currentTime = 0;
+      }
+    });
+  }, [currentVideoIndex]);
+
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-black">
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src={heroVideo} type="video/mp4" />
-      </video>
+      {videos.map((video, index) => (
+        <video
+          key={video}
+          ref={(el) => (videoRefs.current[index] = el)}
+          muted
+          playsInline
+          preload="auto"
+          autoPlay={index === 0}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            index === currentVideoIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+          }`}
+          onEnded={index === currentVideoIndex ? handleVideoEnded : undefined}
+        >
+          <source src={video} type="video/mp4" />
+        </video>
+      ))}
       
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-20" />
 
