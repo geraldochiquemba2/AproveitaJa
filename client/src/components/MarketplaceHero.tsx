@@ -11,6 +11,7 @@ interface MarketplaceHeroProps {
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [videoError, setVideoError] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,25 +20,32 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
 
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
-      {!videoError ? (
+      <img
+        src={imageSrc}
+        alt="Marketplace"
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+          videoLoaded && !videoError ? "opacity-0" : "opacity-100"
+        }`}
+      />
+      
+      {!videoError && (
         <video
           autoPlay
           loop
           muted
           playsInline
-          preload="auto"
-          className="absolute inset-0 w-full h-full object-cover"
+          preload="metadata"
+          poster={imageSrc}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            videoLoaded ? "opacity-100" : "opacity-0"
+          }`}
           onError={() => setVideoError(true)}
+          onLoadedData={() => setVideoLoaded(true)}
         >
           <source src="/videos/marketplace.mp4" type="video/mp4" />
         </video>
-      ) : (
-        <img
-          src={imageSrc}
-          alt="Marketplace"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
       )}
+      
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
 
       <div className="relative h-full flex items-center justify-center px-4">
