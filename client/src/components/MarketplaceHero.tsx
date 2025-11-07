@@ -16,15 +16,40 @@ const videos = [heroVideo1, heroVideo2, heroVideo3];
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [nextVideoIndex, setNextVideoIndex] = useState(1);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const transitionStarted = useRef(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch?.(searchQuery);
   };
 
-  const handleVideoEnded = () => {
-    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+  const handleTimeUpdate = (index: number) => {
+    const video = videoRefs.current[index];
+    if (!video || index !== currentVideoIndex) return;
+
+    const timeRemaining = video.duration - video.currentTime;
+    
+    if (timeRemaining <= 1.5 && !transitionStarted.current) {
+      transitionStarted.current = true;
+      const nextIndex = (currentVideoIndex + 1) % videos.length;
+      const nextVideo = videoRefs.current[nextIndex];
+      
+      if (nextVideo) {
+        nextVideo.currentTime = 0;
+        nextVideo.play().catch(() => {});
+      }
+      
+      setNextVideoIndex(nextIndex);
+    }
+  };
+
+  const handleVideoEnded = (index: number) => {
+    if (index === currentVideoIndex) {
+      transitionStarted.current = false;
+      setCurrentVideoIndex(nextVideoIndex);
+    }
   };
 
   useEffect(() => {
@@ -32,14 +57,16 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
       const video = videoRefs.current[index];
       if (!video) return;
 
+      video.load();
+      
       if (index === currentVideoIndex) {
         video.play().catch(() => {});
-      } else {
+      } else if (index !== nextVideoIndex) {
         video.pause();
         video.currentTime = 0;
       }
     });
-  }, [currentVideoIndex]);
+  }, [currentVideoIndex, nextVideoIndex]);
 
   return (
     <section className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-black">
@@ -52,9 +79,12 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
           preload="auto"
           autoPlay={index === 0}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            index === currentVideoIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+            index === currentVideoIndex || index === nextVideoIndex 
+              ? "opacity-100 z-10" 
+              : "opacity-0 z-0"
           }`}
-          onEnded={index === currentVideoIndex ? handleVideoEnded : undefined}
+          onTimeUpdate={() => handleTimeUpdate(index)}
+          onEnded={() => handleVideoEnded(index)}
         >
           <source src={video} type="video/mp4" />
         </video>
