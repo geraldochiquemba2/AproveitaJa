@@ -10,6 +10,8 @@ interface MarketplaceHeroProps {
 
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,8 +24,28 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
         src={imageSrc}
         alt="Marketplace"
         loading="eager"
-        className="absolute inset-0 w-full h-full object-cover"
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+          videoLoaded && !videoError ? "opacity-0" : "opacity-100"
+        }`}
       />
+      
+      {!videoError && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            videoLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          onLoadedData={() => setVideoLoaded(true)}
+          onError={() => setVideoError(true)}
+        >
+          <source src="/videos/marketplace.mp4" type="video/mp4" />
+        </video>
+      )}
+      
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
 
       <div className="relative h-full flex items-center justify-center px-4">
