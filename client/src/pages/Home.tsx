@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Product } from "@shared/schema";
@@ -15,6 +15,7 @@ const MARKETPLACE_FEE = 0.15;
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [, setLocation] = useLocation();
+  const productsRef = useRef<HTMLElement>(null);
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products'],
@@ -25,6 +26,19 @@ export default function Home() {
   const filteredProducts = selectedCategory
     ? (products || []).filter((p: any) => p.category === selectedCategory)
     : (products || []);
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    
+    setTimeout(() => {
+      if (productsRef.current) {
+        productsRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }, 100);
+  };
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -38,13 +52,15 @@ export default function Home() {
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
+        onSelectCategory={handleCategorySelect}
       />
 
-      <section className="py-8 px-4">
+      <section ref={productsRef} className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2">Produtos em Destaque</h2>
+            <h2 className="text-2xl font-bold mb-2">
+              {selectedCategory ? `Categoria: ${selectedCategory}` : "Produtos em Destaque"}
+            </h2>
             <p className="text-muted-foreground">
               Economize até 70% em produtos frescos antes da validade
             </p>
