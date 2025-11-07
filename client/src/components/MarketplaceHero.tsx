@@ -1,21 +1,36 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface MarketplaceHeroProps {
   imageSrc: string;
   onSearch?: (query: string) => void;
 }
 
+const videos = [
+  "/videos/marketplace.mp4",
+  "/videos/marketplace2.mp4"
+];
+
 export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch?.(searchQuery);
+  };
+
+  const handleVideoEnded = () => {
+    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
   };
 
   return (
@@ -31,8 +46,8 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
       
       {!videoError && (
         <video
+          ref={videoRef}
           autoPlay
-          loop
           muted
           playsInline
           preload="metadata"
@@ -41,8 +56,9 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
           }`}
           onLoadedData={() => setVideoLoaded(true)}
           onError={() => setVideoError(true)}
+          onEnded={handleVideoEnded}
         >
-          <source src="/videos/marketplace.mp4" type="video/mp4" />
+          <source src={videos[currentVideoIndex]} type="video/mp4" />
         </video>
       )}
       
