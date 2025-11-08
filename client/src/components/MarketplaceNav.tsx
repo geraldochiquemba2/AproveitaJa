@@ -37,15 +37,11 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
         className={`sticky top-0 z-50 transition-all duration-300 ${
           isScrolled 
             ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm' 
-            : 'bg-transparent'
+            : '!bg-transparent'
         }`}
       >
-        <div className={`max-w-7xl mx-auto px-4 md:px-6 transition-colors ${
-          isScrolled ? '' : 'bg-transparent'
-        }`}>
-          <div className={`flex items-center justify-between h-16 ${
-            isScrolled ? '' : 'bg-transparent'
-          }`}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-center justify-between h-16">
             <Link href="/" data-testid="link-logo">
               <div className="cursor-pointer">
                 <h1 className={`text-xl md:text-2xl font-bold transition-colors ${
