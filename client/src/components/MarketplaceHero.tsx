@@ -34,8 +34,8 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
 
     const timeRemaining = currentVideo.duration - currentVideo.currentTime;
     
-    // Quando faltarem 2 segundos, pré-carregar o próximo vídeo
-    if (timeRemaining <= 2 && timeRemaining > 1.5) {
+    // Quando faltarem 4 segundos, pré-carregar o próximo vídeo
+    if (timeRemaining <= 4 && timeRemaining > 3.5) {
       const nextIndex = (currentVideoIndex + 1) % videos.length;
       const nextPlayer = activePlayer === 0 ? 1 : 0;
       const nextVideo = nextPlayer === 0 ? videoRef1.current : videoRef2.current;
