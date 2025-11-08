@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Product, Store } from '@shared/schema';
@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MapPin, Package, ArrowLeft } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import MarketplaceNav from '@/components/MarketplaceNav';
+import { angolaProvinces, getMunicipalitiesByProvince } from '@/lib/angola-locations';
 
 const MARKETPLACE_FEE = 0.15;
 
@@ -32,12 +33,23 @@ export default function Checkout() {
   const { toast } = useToast();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   
-  const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('delivery');
   const [address, setAddress] = useState(user?.address || '');
-  const [latitude, setLatitude] = useState(user?.latitude || '');
-  const [longitude, setLongitude] = useState(user?.longitude || '');
+  const [province, setProvince] = useState('');
+  const [municipality, setMunicipality] = useState('');
+  const [municipalities, setMunicipalities] = useState<string[]>([]);
 
   const isCartCheckout = id === 'carrinho';
+
+  useEffect(() => {
+    if (province) {
+      const muns = getMunicipalitiesByProvince(province);
+      setMunicipalities(muns);
+      setMunicipality('');
+    } else {
+      setMunicipalities([]);
+      setMunicipality('');
+    }
+  }, [province]);
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ['/api/products', id],
@@ -70,13 +82,9 @@ export default function Checkout() {
             const orderData = {
               productId: item.product.id,
               quantity: item.quantity.toString(),
-              deliveryType,
+              deliveryType: 'delivery',
               totalPrice: totalPrice.toString(),
-              ...(deliveryType === 'delivery' && {
-                deliveryAddress: address,
-                deliveryLatitude: latitude,
-                deliveryLongitude: longitude,
-              }),
+              deliveryAddress: `${address}, ${municipality}, ${province}`,
             };
 
             const response = await apiRequest('POST', '/api/orders', orderData);
@@ -92,13 +100,9 @@ export default function Checkout() {
 
         const orderData = {
           productId: product.id,
-          deliveryType,
+          deliveryType: 'delivery',
           totalPrice: totalPrice.toString(),
-          ...(deliveryType === 'delivery' && {
-            deliveryAddress: address,
-            deliveryLatitude: latitude,
-            deliveryLongitude: longitude,
-          }),
+          deliveryAddress: `${address}, ${municipality}, ${province}`,
         };
 
         const response = await apiRequest('POST', '/api/orders', orderData);
@@ -178,7 +182,7 @@ export default function Checkout() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (deliveryType === 'delivery' && (!address || !latitude || !longitude)) {
+    if (!address || !province || !municipality) {
       toast({
         title: 'Informação faltando',
         description: 'Por favor, preencha todos os campos de entrega.',
@@ -289,93 +293,61 @@ export default function Checkout() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Tipo de Entrega</CardTitle>
-                <CardDescription>Escolha como deseja receber seu pedido</CardDescription>
+                <CardTitle className="text-lg">Endereço de Entrega</CardTitle>
+                <CardDescription>
+                  Informe onde deseja receber seu pedido
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <RadioGroup value={deliveryType} onValueChange={(v) => setDeliveryType(v as 'pickup' | 'delivery')}>
-                  <div className="flex items-center space-x-2 p-4 border rounded hover-elevate">
-                    <RadioGroupItem value="pickup" id="pickup" data-testid="radio-pickup" />
-                    <Label htmlFor="pickup" className="flex-1 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        <div>
-                          <p className="font-medium">Retirar na Loja</p>
-                          {!isCartCheckout && store && (
-                            <p className="text-sm text-muted-foreground">{store.address}</p>
-                          )}
-                          {isCartCheckout && (
-                            <p className="text-sm text-muted-foreground">Você combinará com cada vendedor</p>
-                          )}
-                        </div>
-                      </div>
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-4 border rounded hover-elevate">
-                    <RadioGroupItem value="delivery" id="delivery" data-testid="radio-delivery" />
-                    <Label htmlFor="delivery" className="flex-1 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <div>
-                          <p className="font-medium">Entrega no Endereço</p>
-                          <p className="text-sm text-muted-foreground">
-                            Receba em casa
-                          </p>
-                        </div>
-                      </div>
-                    </Label>
-                  </div>
-                </RadioGroup>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="province">Província</Label>
+                  <Select value={province} onValueChange={setProvince}>
+                    <SelectTrigger id="province" data-testid="select-province">
+                      <SelectValue placeholder="Selecione a província" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {angolaProvinces.map((prov) => (
+                        <SelectItem key={prov} value={prov}>
+                          {prov}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="municipality">Município</Label>
+                  <Select 
+                    value={municipality} 
+                    onValueChange={setMunicipality}
+                    disabled={!province}
+                  >
+                    <SelectTrigger id="municipality" data-testid="select-municipality">
+                      <SelectValue placeholder={province ? "Selecione o município" : "Primeiro selecione a província"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {municipalities.map((mun) => (
+                        <SelectItem key={mun} value={mun}>
+                          {mun}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="address">Endereço Completo</Label>
+                  <Input
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Rua, número, bairro"
+                    required
+                    data-testid="input-address"
+                  />
+                </div>
               </CardContent>
             </Card>
-
-            {deliveryType === 'delivery' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Endereço de Entrega</CardTitle>
-                  <CardDescription>
-                    Informe onde deseja receber seu pedido
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="address">Endereço Completo</Label>
-                    <Input
-                      id="address"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="Rua, número, bairro"
-                      required
-                      data-testid="input-address"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="latitude">Latitude</Label>
-                      <Input
-                        id="latitude"
-                        value={latitude}
-                        onChange={(e) => setLatitude(e.target.value)}
-                        placeholder="-8.838333"
-                        required
-                        data-testid="input-latitude"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="longitude">Longitude</Label>
-                      <Input
-                        id="longitude"
-                        value={longitude}
-                        onChange={(e) => setLongitude(e.target.value)}
-                        placeholder="13.234444"
-                        required
-                        data-testid="input-longitude"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             <Button
               size="lg"
@@ -393,6 +365,9 @@ export default function Checkout() {
                 `Confirmar Pedido - ${totalPrice.toFixed(2)} Kz`
               )}
             </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Seu pedido será enviado para o administrador processar
+            </p>
           </div>
         </div>
       </div>
