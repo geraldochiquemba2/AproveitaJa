@@ -44,10 +44,12 @@ export default function Home() {
     <div className="min-h-screen pb-20 md:pb-0">
       <MarketplaceNav cartCount={0} />
       
-      <MarketplaceHero
-        imageSrc={heroImage}
-        onSearch={(query) => console.log("Search:", query)}
-      />
+      <div className="-mt-16">
+        <MarketplaceHero
+          imageSrc={heroImage}
+          onSearch={(query) => console.log("Search:", query)}
+        />
+      </div>
 
       <CategoryFilter
         categories={categories}
