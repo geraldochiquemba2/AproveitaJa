@@ -103,12 +103,11 @@ export class MemStorage implements IStorage {
 
   async getActiveProducts(): Promise<Product[]> {
     const now = new Date();
-    const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
     
     return Array.from(this.products.values()).filter(
       (product) => 
         product.isActive && 
-        new Date(product.createdAt) > tenDaysAgo
+        new Date(product.expirationDate) > now
     );
   }
 
@@ -245,15 +244,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveProducts(): Promise<Product[]> {
-    const tenDaysAgo = new Date();
-    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    const now = new Date();
     
     return await db.select()
       .from(products)
       .where(
         and(
           eq(products.isActive, true),
-          gt(products.createdAt, tenDaysAgo)
+          gt(products.expirationDate, now)
         )
       );
   }
