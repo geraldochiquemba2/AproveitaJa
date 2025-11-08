@@ -71,17 +71,17 @@ export default function Login() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
-        <Card className="w-full bg-white/95 backdrop-blur-md">
+        <Card className="w-full bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Aproveita Já</CardTitle>
-            <CardDescription className="text-center">
+            <CardTitle className="text-2xl font-bold text-center text-white">Aproveita Já</CardTitle>
+            <CardDescription className="text-center text-white/80">
               Entre com seu telefone e senha
             </CardDescription>
           </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Número de Telefone</Label>
+              <Label htmlFor="phone" className="text-white">Número de Telefone</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -93,7 +93,7 @@ export default function Login() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="text-white">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -120,11 +120,11 @@ export default function Login() {
               )}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-4 text-center text-sm text-white/80">
             Não tem uma conta?{' '}
             <button
               onClick={() => setLocation('/registro')}
-              className="text-primary hover:underline font-medium"
+              className="text-white hover:underline font-medium"
               data-testid="link-register"
             >
               Registre-se
