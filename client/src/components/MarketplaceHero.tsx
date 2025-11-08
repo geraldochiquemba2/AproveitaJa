@@ -17,6 +17,7 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
   const [searchQuery, setSearchQuery] = useState("");
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [activePlayer, setActivePlayer] = useState<0 | 1>(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const videoRef1 = useRef<HTMLVideoElement | null>(null);
   const videoRef2 = useRef<HTMLVideoElement | null>(null);
 
@@ -25,27 +26,44 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
     onSearch?.(searchQuery);
   };
 
+  const handleTimeUpdate = (player: 0 | 1) => {
+    if (player !== activePlayer || isTransitioning) return;
+    
+    const currentVideo = player === 0 ? videoRef1.current : videoRef2.current;
+    if (!currentVideo) return;
+
+    const timeRemaining = currentVideo.duration - currentVideo.currentTime;
+    
+    // Quando faltarem 2 segundos, pré-carregar o próximo vídeo
+    if (timeRemaining <= 2 && timeRemaining > 1.5) {
+      const nextIndex = (currentVideoIndex + 1) % videos.length;
+      const nextPlayer = activePlayer === 0 ? 1 : 0;
+      const nextVideo = nextPlayer === 0 ? videoRef1.current : videoRef2.current;
+      
+      if (nextVideo && !isTransitioning) {
+        setIsTransitioning(true);
+        nextVideo.src = videos[nextIndex];
+        nextVideo.load();
+        nextVideo.play().catch(() => {});
+      }
+    }
+  };
+
   const handleVideoEnded = (player: 0 | 1) => {
     if (player !== activePlayer) return;
     
     const nextIndex = (currentVideoIndex + 1) % videos.length;
     const nextPlayer = activePlayer === 0 ? 1 : 0;
-    const nextVideo = nextPlayer === 0 ? videoRef1.current : videoRef2.current;
     
-    if (nextVideo) {
-      nextVideo.src = videos[nextIndex];
-      nextVideo.load();
-      nextVideo.play().then(() => {
-        setActivePlayer(nextPlayer);
-        setCurrentVideoIndex(nextIndex);
-      }).catch(() => {});
-    }
+    setActivePlayer(nextPlayer);
+    setCurrentVideoIndex(nextIndex);
+    setIsTransitioning(false);
   };
 
   useEffect(() => {
     const video1 = videoRef1.current;
-    if (video1 && activePlayer === 0) {
-      video1.src = videos[currentVideoIndex];
+    if (video1 && currentVideoIndex === 0) {
+      video1.src = videos[0];
       video1.load();
       video1.play().catch(() => {});
     }
@@ -57,9 +75,10 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
         ref={videoRef1}
         muted
         playsInline
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
           activePlayer === 0 ? "opacity-100 z-10" : "opacity-0 z-0"
         }`}
+        onTimeUpdate={() => handleTimeUpdate(0)}
         onEnded={() => handleVideoEnded(0)}
       />
       
@@ -67,9 +86,10 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
         ref={videoRef2}
         muted
         playsInline
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
           activePlayer === 1 ? "opacity-100 z-10" : "opacity-0 z-0"
         }`}
+        onTimeUpdate={() => handleTimeUpdate(1)}
         onEnded={() => handleVideoEnded(1)}
       />
       
