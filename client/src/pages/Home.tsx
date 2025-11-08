@@ -14,6 +14,7 @@ import laticiniosImg from '@assets/stock_images/dairy_products_milk__cc494009.jp
 import frutasImg from '@assets/stock_images/fresh_colorful_fruit_dfd109f7.jpg';
 import bebidasImg from '@assets/stock_images/beverages_drinks_beb_c5a8a04d.jpg';
 import snacksImg from '@assets/stock_images/snacks_chips_treats_c90f0da2.jpg';
+import destaqueImg from '@assets/stock_images/grocery_shopping_pro_88af1288.jpg';
 
 const MARKETPLACE_FEE = 0.15;
 
@@ -31,7 +32,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    Object.values(categoryBackgrounds).forEach((imgSrc) => {
+    const allImages = [...Object.values(categoryBackgrounds), destaqueImg];
+    allImages.forEach((imgSrc) => {
       const img = new Image();
       img.src = imgSrc;
     });
@@ -84,19 +86,17 @@ export default function Home() {
             style={{
               backgroundImage: selectedCategory && categoryBackgrounds[selectedCategory] 
                 ? `url(${categoryBackgrounds[selectedCategory]})` 
-                : 'none',
+                : `url(${destaqueImg})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
           >
-            {selectedCategory && categoryBackgrounds[selectedCategory] && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            )}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <div className="relative z-10">
-              <h2 className={`text-2xl font-bold mb-2 ${selectedCategory ? 'text-white' : ''}`}>
+              <h2 className="text-2xl font-bold mb-2 text-white">
                 {selectedCategory ? `Categoria: ${selectedCategory}` : "Produtos em Destaque"}
               </h2>
-              <p className={selectedCategory ? 'text-white/90' : 'text-muted-foreground'}>
+              <p className="text-white/90">
                 Economize até 70% em produtos frescos antes da validade
               </p>
             </div>
