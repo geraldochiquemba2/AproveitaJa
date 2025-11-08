@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Product } from "@shared/schema";
@@ -29,6 +29,13 @@ export default function Home() {
     "Bebidas": bebidasImg,
     "Snacks": snacksImg,
   };
+
+  useEffect(() => {
+    Object.values(categoryBackgrounds).forEach((imgSrc) => {
+      const img = new Image();
+      img.src = imgSrc;
+    });
+  }, []);
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products'],
