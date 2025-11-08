@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
+import loginVideo from "@assets/login-video-compressed.mp4";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -15,6 +16,16 @@ export default function Login() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.src = loginVideo;
+      video.load();
+      video.play().catch(() => {});
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,18 +50,28 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <video
+        ref={videoRef}
+        className="absolute inset-0 w-full h-full object-cover"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      
+      <div className="relative z-10 w-full max-w-md p-4">
         <Button
           variant="ghost"
           onClick={() => setLocation('/')}
-          className="mb-4"
+          className="mb-4 bg-white/10 hover:bg-white/20 text-white border-white/20"
           data-testid="button-back"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
-        <Card className="w-full">
+        <Card className="w-full bg-white/95 backdrop-blur-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Aproveita Já</CardTitle>
             <CardDescription className="text-center">
