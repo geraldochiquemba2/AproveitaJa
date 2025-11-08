@@ -119,7 +119,7 @@ async function seed() {
         discountedPrice: "250",
         imageUrl: "/attached_assets/stock_images/fresh_bread_loaves_b_73b0a02b.jpg",
         stockQuantity: "50",
-        daysUntilExpiration: 2,
+        daysUntilExpiration: 122,
       },
       {
         name: "Pão Francês",
@@ -128,7 +128,7 @@ async function seed() {
         discountedPrice: "150",
         imageUrl: "/attached_assets/stock_images/fresh_bread_loaves_b_21d80b46.jpg",
         stockQuantity: "80",
-        daysUntilExpiration: 1,
+        daysUntilExpiration: 121,
       },
       {
         name: "Frutas Frescas Sortidas",
@@ -137,7 +137,7 @@ async function seed() {
         discountedPrice: "1000",
         imageUrl: "/attached_assets/stock_images/fresh_fruits_vegetab_a0471eb2.jpg",
         stockQuantity: "30",
-        daysUntilExpiration: 3,
+        daysUntilExpiration: 123,
       },
       {
         name: "Vegetais Frescos do Dia",
@@ -146,7 +146,7 @@ async function seed() {
         discountedPrice: "750",
         imageUrl: "/attached_assets/stock_images/fresh_fruits_vegetab_b624c8c9.jpg",
         stockQuantity: "40",
-        daysUntilExpiration: 2,
+        daysUntilExpiration: 122,
       },
       {
         name: "Salada Mista",
@@ -155,7 +155,7 @@ async function seed() {
         discountedPrice: "600",
         imageUrl: "/attached_assets/stock_images/fresh_fruits_vegetab_74d08584.jpg",
         stockQuantity: "25",
-        daysUntilExpiration: 1,
+        daysUntilExpiration: 121,
       },
       {
         name: "Leite Fresco 1L",
