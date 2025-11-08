@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import loginVideo from "@assets/login-video-compressed.mp4";
+import loginVideo from "@assets/6898054-hd_1920_1080_25fps_1762594567633.mp4";
 
 export default function Login() {
   const [, setLocation] = useLocation();
