@@ -30,6 +30,7 @@ export const products = pgTable("products", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   storeId: varchar("store_id").notNull().references(() => stores.id),
   name: text("name").notNull(),
+  category: text("category").notNull(),
   originalPrice: decimal("original_price", { precision: 10, scale: 2 }).notNull(),
   discountedPrice: decimal("discounted_price", { precision: 10, scale: 2 }).notNull(),
   expirationDate: timestamp("expiration_date").notNull(),

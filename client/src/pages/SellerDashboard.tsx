@@ -41,6 +41,7 @@ export default function SellerDashboard() {
   const [productMunicipality, setProductMunicipality] = useState('');
   const [discountedPriceInput, setDiscountedPriceInput] = useState('');
   const [selectedStoreId, setSelectedStoreId] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const { data: stores, isLoading: storesLoading } = useQuery<Store[]>({
     queryKey: ['/api/stores/my'],
@@ -111,6 +112,7 @@ export default function SellerDashboard() {
       setProductProvince('');
       setProductMunicipality('');
       setDiscountedPriceInput('');
+      setSelectedCategory('');
       toast({ title: 'Produto adicionado com sucesso!' });
     },
     onError: (error: any) => {
@@ -168,6 +170,15 @@ export default function SellerDashboard() {
       return;
     }
     
+    if (!selectedCategory) {
+      toast({ 
+        title: 'Erro', 
+        description: 'Por favor, selecione a categoria do produto',
+        variant: 'destructive' 
+      });
+      return;
+    }
+    
     const imageFile = formData.get('image') as File;
     if (!imageFile) {
       toast({ 
@@ -188,6 +199,7 @@ export default function SellerDashboard() {
       const productData = {
         storeId: store!.id,
         name: formData.get('name') as string,
+        category: selectedCategory,
         originalPrice: formData.get('originalPrice') as string,
         discountedPrice: finalDiscountedPrice.toFixed(2),
         expirationDate: new Date(formData.get('expirationDate') as string).toISOString(),
@@ -507,6 +519,7 @@ export default function SellerDashboard() {
                 setDiscountedPriceInput('');
                 setProductProvince('');
                 setProductMunicipality('');
+                setSelectedCategory('');
               }
             }}
           >
@@ -532,6 +545,25 @@ export default function SellerDashboard() {
                     required
                     data-testid="input-product-name"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="category">Categoria</Label>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory} required>
+                    <SelectTrigger id="category" data-testid="select-category">
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Padaria">Padaria</SelectItem>
+                      <SelectItem value="Laticínios">Laticínios</SelectItem>
+                      <SelectItem value="Frutas">Frutas</SelectItem>
+                      <SelectItem value="Bebidas">Bebidas</SelectItem>
+                      <SelectItem value="Snacks">Snacks</SelectItem>
+                      <SelectItem value="Carnes">Carnes</SelectItem>
+                      <SelectItem value="Mercearia">Mercearia</SelectItem>
+                      <SelectItem value="Congelados">Congelados</SelectItem>
+                      <SelectItem value="Higiene">Higiene</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>

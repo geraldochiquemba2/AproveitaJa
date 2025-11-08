@@ -43,7 +43,7 @@ export default function Home() {
     queryKey: ['/api/products'],
   });
 
-  const categories = ["Padaria", "Laticínios", "Frutas", "Bebidas", "Snacks"];
+  const categories = ["Padaria", "Laticínios", "Frutas", "Bebidas", "Snacks", "Carnes", "Mercearia", "Congelados", "Higiene"];
 
   const filteredProducts = selectedCategory
     ? (products || []).filter((p: any) => p.category === selectedCategory)
