@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -40,13 +40,35 @@ export default function SellerDashboard() {
   const [productProvince, setProductProvince] = useState<ProvinceName | ''>('');
   const [productMunicipality, setProductMunicipality] = useState('');
   const [discountedPriceInput, setDiscountedPriceInput] = useState('');
+  const [selectedStoreId, setSelectedStoreId] = useState<string>('');
 
   const { data: stores, isLoading: storesLoading } = useQuery<Store[]>({
     queryKey: ['/api/stores/my'],
     enabled: user?.role === 'seller',
   });
 
-  const store = stores?.[0];
+  const activeStoreId = useMemo(() => {
+    if (selectedStoreId) return selectedStoreId;
+    if (stores && stores.length > 0) return stores[0].id;
+    return '';
+  }, [selectedStoreId, stores]);
+
+  useEffect(() => {
+    if (activeStoreId && activeStoreId !== selectedStoreId) {
+      setSelectedStoreId(activeStoreId);
+    }
+  }, [activeStoreId, selectedStoreId]);
+
+  const currentStore = stores?.find(s => s.id === activeStoreId);
+  
+  const lastKnownStoreRef = useRef<Store | undefined>();
+  useEffect(() => {
+    if (currentStore) {
+      lastKnownStoreRef.current = currentStore;
+    }
+  }, [currentStore]);
+  
+  const store = currentStore || (lastKnownStoreRef.current?.id === activeStoreId ? lastKnownStoreRef.current : undefined);
 
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ['/api/products/store', store?.id],
@@ -64,11 +86,13 @@ export default function SellerDashboard() {
       const response = await apiRequest('POST', '/api/stores', data);
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (newStore) => {
+      lastKnownStoreRef.current = newStore;
       queryClient.invalidateQueries({ queryKey: ['/api/stores/my'] });
       setStoreDialogOpen(false);
       setSelectedProvince('');
       setSelectedMunicipality('');
+      setSelectedStoreId(newStore.id);
       toast({ title: 'Loja criada com sucesso!' });
     },
     onError: (error: any) => {
@@ -197,7 +221,9 @@ export default function SellerDashboard() {
     );
   }
 
-  if (!store) {
+  const isLoadingStore = !store && activeStoreId && !lastKnownStoreRef.current;
+
+  if (!store && !isLoadingStore) {
     return (
       <div className="min-h-screen">
         <MarketplaceNav />
@@ -333,11 +359,142 @@ export default function SellerDashboard() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
-        <div className="mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold" data-testid="text-dashboard-title">
-            Minha Loja: {store.storeName}
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground break-words">{store.address}</p>
+        
+        {isLoadingStore ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : (
+          <>
+            <div className="mb-4 sm:mb-6 space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <div className="flex-1">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold" data-testid="text-dashboard-title">
+                    {store!.storeName}
+                  </h1>
+                  <p className="text-sm sm:text-base text-muted-foreground break-words">{store!.address}</p>
+                </div>
+            {stores && stores.length > 1 && (
+              <div className="w-full sm:w-64">
+                <Select value={activeStoreId} onValueChange={setSelectedStoreId}>
+                  <SelectTrigger data-testid="select-store">
+                    <SelectValue placeholder="Selecione uma loja" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stores.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.storeName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+          
+          <Dialog open={storeDialogOpen} onOpenChange={setStoreDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" data-testid="button-create-new-store">
+                <Plus className="mr-2 h-4 w-4" />
+                Criar Nova Loja
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Criar Nova Loja</DialogTitle>
+                <DialogDescription>
+                  Preencha as informações da sua nova loja
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleStoreSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="storeName">Nome da Loja</Label>
+                  <Input
+                    id="storeName"
+                    name="storeName"
+                    required
+                    data-testid="input-store-name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="supervisorPhone">Telefone do Supervisor</Label>
+                  <Input
+                    id="supervisorPhone"
+                    name="supervisorPhone"
+                    type="tel"
+                    required
+                    data-testid="input-supervisor-phone"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="province">Província</Label>
+                    <Select
+                      value={selectedProvince}
+                      onValueChange={(value) => {
+                        setSelectedProvince(value as ProvinceName);
+                        setSelectedMunicipality('');
+                      }}
+                    >
+                      <SelectTrigger id="province" data-testid="select-province">
+                        <SelectValue placeholder="Selecione a província" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getProvinces().map((province) => (
+                          <SelectItem key={province} value={province}>
+                            {province}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="municipality">Município</Label>
+                    <Select
+                      value={selectedMunicipality}
+                      onValueChange={setSelectedMunicipality}
+                      disabled={!selectedProvince}
+                    >
+                      <SelectTrigger id="municipality" data-testid="select-municipality">
+                        <SelectValue placeholder="Selecione o município" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedProvince && getMunicipalities(selectedProvince).map((municipality) => (
+                          <SelectItem key={municipality} value={municipality}>
+                            {municipality}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="address">Endereço Completo</Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    required
+                    data-testid="input-address"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={createStoreMutation.isPending}
+                  data-testid="button-submit-store"
+                  className="w-full"
+                >
+                  {createStoreMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Criando...
+                    </>
+                  ) : (
+                    'Criar Loja'
+                  )}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4 sm:mb-6">
@@ -593,6 +750,8 @@ export default function SellerDashboard() {
             </CardContent>
           </Card>
         )}
+        </>
+      )}
       </div>
     </div>
   );
