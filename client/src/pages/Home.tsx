@@ -9,6 +9,11 @@ import ProductCard from "@/components/ProductCard";
 import { Loader2 } from "lucide-react";
 
 import heroImage from '@assets/generated_images/Hero_image_shoppers_Angola_00c6e573.png';
+import padariaImg from '@assets/stock_images/fresh_bakery_bread_p_3b5fff0c.jpg';
+import laticiniosImg from '@assets/stock_images/dairy_products_milk__cc494009.jpg';
+import frutasImg from '@assets/stock_images/fresh_colorful_fruit_dfd109f7.jpg';
+import bebidasImg from '@assets/stock_images/beverages_drinks_beb_c5a8a04d.jpg';
+import snacksImg from '@assets/stock_images/snacks_chips_treats_c90f0da2.jpg';
 
 const MARKETPLACE_FEE = 0.15;
 
@@ -16,6 +21,14 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [, setLocation] = useLocation();
   const productsRef = useRef<HTMLElement>(null);
+
+  const categoryBackgrounds: Record<string, string> = {
+    "Padaria": padariaImg,
+    "Laticínios": laticiniosImg,
+    "Frutas": frutasImg,
+    "Bebidas": bebidasImg,
+    "Snacks": snacksImg,
+  };
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products'],
@@ -59,13 +72,27 @@ export default function Home() {
 
       <section ref={productsRef} className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6 bg-card border border-card-border rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-2">
-              {selectedCategory ? `Categoria: ${selectedCategory}` : "Produtos em Destaque"}
-            </h2>
-            <p className="text-muted-foreground">
-              Economize até 70% em produtos frescos antes da validade
-            </p>
+          <div 
+            className="mb-6 rounded-lg p-6 relative overflow-hidden"
+            style={{
+              backgroundImage: selectedCategory && categoryBackgrounds[selectedCategory] 
+                ? `url(${categoryBackgrounds[selectedCategory]})` 
+                : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            {selectedCategory && categoryBackgrounds[selectedCategory] && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            )}
+            <div className="relative z-10">
+              <h2 className={`text-2xl font-bold mb-2 ${selectedCategory ? 'text-white' : ''}`}>
+                {selectedCategory ? `Categoria: ${selectedCategory}` : "Produtos em Destaque"}
+              </h2>
+              <p className={selectedCategory ? 'text-white/90' : 'text-muted-foreground'}>
+                Economize até 70% em produtos frescos antes da validade
+              </p>
+            </div>
           </div>
 
           {isLoading ? (
