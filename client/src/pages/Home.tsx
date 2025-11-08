@@ -59,7 +59,7 @@ export default function Home() {
 
       <section ref={productsRef} className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
+          <div className="mb-6 bg-card border border-card-border rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-2">
               {selectedCategory ? `Categoria: ${selectedCategory}` : "Produtos em Destaque"}
             </h2>
