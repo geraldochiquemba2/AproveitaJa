@@ -64,7 +64,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
-      <MarketplaceNav cartCount={0} />
+      <MarketplaceNav />
       
       <div className="-mt-16">
         <MarketplaceHero

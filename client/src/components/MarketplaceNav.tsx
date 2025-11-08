@@ -3,6 +3,7 @@ import { ShoppingCart, User, Home, Package, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
 import { useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -13,13 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface MarketplaceNavProps {
-  cartCount?: number;
-}
-
-export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
+export default function MarketplaceNav() {
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
+  const { itemCount } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
 
   const isHomePage = location === '/';
@@ -113,24 +111,22 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              {user && (
-                <Link href="/carrinho" data-testid="link-cart">
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className={`relative transition-colors ${
-                      isScrolled || !isHomePage ? '' : 'text-white hover:text-white hover:bg-white/20'
-                    }`}
-                  >
-                    <ShoppingCart className="h-5 w-5" />
-                    {cartCount > 0 && (
-                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                        {cartCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </Link>
-              )}
+              <Link href="/carrinho" data-testid="link-cart">
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className={`relative transition-colors ${
+                    isScrolled || !isHomePage ? '' : 'text-white hover:text-white hover:bg-white/20'
+                  }`}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  {itemCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                      {itemCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -175,7 +171,7 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
       </nav>
 
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border safe-area-inset-bottom">
-        <div className={`grid h-16 ${user ? 'grid-cols-4' : 'grid-cols-2'}`}>
+        <div className={`grid h-16 ${user?.role === 'seller' ? 'grid-cols-4' : 'grid-cols-3'}`}>
           <Link href="/" data-testid="link-mobile-home">
             <button className={`flex flex-col items-center justify-center h-full gap-0.5 px-1 ${location === '/' ? 'text-primary' : 'text-muted-foreground'}`}>
               <Home className="h-5 w-5 flex-shrink-0" />
@@ -190,19 +186,17 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
               </button>
             </Link>
           )}
-          {user && (
-            <Link href="/carrinho" data-testid="link-mobile-cart">
-              <button className={`flex flex-col items-center justify-center h-full gap-0.5 px-1 relative ${location === '/carrinho' ? 'text-primary' : 'text-muted-foreground'}`}>
-                <ShoppingCart className="h-5 w-5 flex-shrink-0" />
-                {cartCount > 0 && (
-                  <Badge className="absolute top-1.5 left-1/2 -translate-x-1/2 translate-x-2 h-4 w-4 flex items-center justify-center p-0 text-[10px]">
-                    {cartCount}
-                  </Badge>
-                )}
-                <span className="text-[10px] leading-tight">Carrinho</span>
-              </button>
-            </Link>
-          )}
+          <Link href="/carrinho" data-testid="link-mobile-cart">
+            <button className={`flex flex-col items-center justify-center h-full gap-0.5 px-1 relative ${location === '/carrinho' ? 'text-primary' : 'text-muted-foreground'}`}>
+              <ShoppingCart className="h-5 w-5 flex-shrink-0" />
+              {itemCount > 0 && (
+                <Badge className="absolute top-1.5 left-1/2 -translate-x-1/2 translate-x-2 h-4 w-4 flex items-center justify-center p-0 text-[10px]">
+                  {itemCount}
+                </Badge>
+              )}
+              <span className="text-[10px] leading-tight">Carrinho</span>
+            </button>
+          </Link>
           {user ? (
             <button
               onClick={() => logout()}

@@ -2,11 +2,13 @@ import { useParams, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Product, Store } from '@shared/schema';
 import { useAuth } from '@/lib/auth';
+import { useCart } from '@/lib/cart';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Clock, MapPin, ShoppingCart, ArrowLeft, Plus } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import MarketplaceNav from '@/components/MarketplaceNav';
 
 const MARKETPLACE_FEE = 0.15;
@@ -15,6 +17,8 @@ export default function ProductDetail() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const { user } = useAuth();
+  const { addItem } = useCart();
+  const { toast } = useToast();
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: ['/api/products', id],
@@ -67,12 +71,21 @@ export default function ProductDetail() {
     (new Date(product.expirationDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  const handleBuyNow = () => {
-    if (!user) {
-      setLocation('/login');
-      return;
+  const handleAddToCart = () => {
+    if (product) {
+      addItem(product, 1);
+      toast({
+        title: 'Produto adicionado!',
+        description: `${product.name} foi adicionado ao carrinho.`,
+      });
     }
-    setLocation(`/checkout/${product.id}`);
+  };
+
+  const handleBuyNow = () => {
+    if (product) {
+      addItem(product, 1);
+    }
+    setLocation('/carrinho');
   };
 
   return (
@@ -147,15 +160,27 @@ export default function ProductDetail() {
               </span>
             </div>
 
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={handleBuyNow}
-              data-testid="button-buy-now"
-            >
-              <ShoppingCart className="mr-2 h-5 w-5" />
-              Comprar Agora
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                size="lg"
+                variant="outline"
+                className="flex-1"
+                onClick={handleAddToCart}
+                data-testid="button-add-to-cart"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Adicionar
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={handleBuyNow}
+                data-testid="button-buy-now"
+              >
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                Comprar
+              </Button>
+            </div>
 
             {store && (
               <Card>
