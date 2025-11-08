@@ -59,7 +59,7 @@ export default function Login() {
         muted
         playsInline
       />
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/60" />
       
       <div className="relative z-10 w-full max-w-md p-4">
         <Button
