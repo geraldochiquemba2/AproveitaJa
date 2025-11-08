@@ -44,37 +44,65 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
           <div className="flex items-center justify-between h-16">
             <Link href="/" data-testid="link-logo">
               <div className="cursor-pointer">
-                <h1 className="text-xl md:text-2xl font-bold text-primary">Aproveita Já</h1>
-                <p className="text-xs text-muted-foreground hidden md:block">Economize Antes que Expire</p>
+                <h1 className={`text-xl md:text-2xl font-bold transition-colors ${
+                  isScrolled ? 'text-primary' : 'text-white'
+                }`}>
+                  Aproveita Já
+                </h1>
+                <p className={`text-xs hidden md:block transition-colors ${
+                  isScrolled ? 'text-muted-foreground' : 'text-white/80'
+                }`}>
+                  Economize Antes que Expire
+                </p>
               </div>
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
               <Link href="/" data-testid="link-home">
-                <span className={`cursor-pointer text-sm font-medium ${location === '/' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
+                <span className={`cursor-pointer text-sm font-medium transition-colors ${
+                  location === '/' 
+                    ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
+                    : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                }`}>
                   Início
                 </span>
               </Link>
               <Link href="/sobre" data-testid="link-about">
-                <span className={`cursor-pointer text-sm font-medium ${location === '/sobre' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
+                <span className={`cursor-pointer text-sm font-medium transition-colors ${
+                  location === '/sobre'
+                    ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
+                    : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                }`}>
                   Sobre
                 </span>
               </Link>
               <Link href="/contato" data-testid="link-contact">
-                <span className={`cursor-pointer text-sm font-medium ${location === '/contato' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
+                <span className={`cursor-pointer text-sm font-medium transition-colors ${
+                  location === '/contato'
+                    ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
+                    : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                }`}>
                   Contato
                 </span>
               </Link>
               {user?.role === 'seller' && (
                 <Link href="/vendedor/dashboard" data-testid="link-dashboard">
-                  <span className={`cursor-pointer text-sm font-medium ${location === '/vendedor/dashboard' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
+                  <span className={`cursor-pointer text-sm font-medium transition-colors ${
+                    location === '/vendedor/dashboard'
+                      ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
+                      : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                  }`}>
                     Meus Produtos
                   </span>
                 </Link>
               )}
               {user?.role === 'admin' && (
                 <Link href="/admin" data-testid="link-admin">
-                  <span className={`cursor-pointer text-sm font-medium ${location === '/admin' ? 'text-primary' : 'text-foreground hover:text-primary'}`}>
+                  <span className={`cursor-pointer text-sm font-medium transition-colors ${
+                    location === '/admin'
+                      ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
+                      : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                  }`}>
                     Admin
                   </span>
                 </Link>
@@ -84,7 +112,13 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
             <div className="flex items-center gap-2">
               {user && (
                 <Link href="/carrinho" data-testid="link-cart">
-                  <Button size="icon" variant="ghost" className="relative">
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className={`relative transition-colors ${
+                      isScrolled ? '' : 'text-white hover:text-white hover:bg-white/20'
+                    }`}
+                  >
                     <ShoppingCart className="h-5 w-5" />
                     {cartCount > 0 && (
                       <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
@@ -97,7 +131,14 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost" data-testid="button-user-menu">
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      className={`transition-colors ${
+                        isScrolled ? '' : 'text-white hover:text-white hover:bg-white/20'
+                      }`}
+                      data-testid="button-user-menu"
+                    >
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -117,6 +158,8 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
                 <Button
                   size="sm"
                   onClick={() => setLocation('/login')}
+                  className={isScrolled ? '' : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 border-white/30'}
+                  variant={isScrolled ? 'default' : 'outline'}
                   data-testid="button-login-nav"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
