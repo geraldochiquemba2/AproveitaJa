@@ -84,7 +84,7 @@ export default function Register() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white">Nome Completo</Label>
+              <Label htmlFor="name" className="text-white">Nome Completo/Empresa</Label>
               <Input
                 id="name"
                 type="text"
