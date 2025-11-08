@@ -22,6 +22,8 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
   const { user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const isHomePage = location === '/';
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -36,7 +38,7 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
     <>
       <nav 
         className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled 
+          isScrolled || !isHomePage
             ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm' 
             : 'bg-black/10 backdrop-blur-sm'
         }`}
@@ -46,12 +48,12 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
             <Link href="/" data-testid="link-logo">
               <div className="cursor-pointer">
                 <h1 className={`text-xl md:text-2xl font-bold transition-colors ${
-                  isScrolled ? 'text-primary' : 'text-white'
+                  isScrolled || !isHomePage ? 'text-primary' : 'text-white'
                 }`}>
                   Aproveita Já
                 </h1>
                 <p className={`text-xs hidden md:block transition-colors ${
-                  isScrolled ? 'text-muted-foreground' : 'text-white/80'
+                  isScrolled || !isHomePage ? 'text-muted-foreground' : 'text-white/80'
                 }`}>
                   Economize Antes que Expire
                 </p>
@@ -62,8 +64,8 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
               <Link href="/" data-testid="link-home">
                 <span className={`cursor-pointer text-sm font-medium transition-colors ${
                   location === '/' 
-                    ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
-                    : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                    ? (isScrolled || !isHomePage ? 'text-primary' : 'text-white font-semibold')
+                    : (isScrolled || !isHomePage ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
                 }`}>
                   Início
                 </span>
@@ -71,8 +73,8 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
               <Link href="/sobre" data-testid="link-about">
                 <span className={`cursor-pointer text-sm font-medium transition-colors ${
                   location === '/sobre'
-                    ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
-                    : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                    ? (isScrolled || !isHomePage ? 'text-primary' : 'text-white font-semibold')
+                    : (isScrolled || !isHomePage ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
                 }`}>
                   Sobre
                 </span>
@@ -80,8 +82,8 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
               <Link href="/contato" data-testid="link-contact">
                 <span className={`cursor-pointer text-sm font-medium transition-colors ${
                   location === '/contato'
-                    ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
-                    : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                    ? (isScrolled || !isHomePage ? 'text-primary' : 'text-white font-semibold')
+                    : (isScrolled || !isHomePage ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
                 }`}>
                   Contato
                 </span>
@@ -90,8 +92,8 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
                 <Link href="/vendedor/dashboard" data-testid="link-dashboard">
                   <span className={`cursor-pointer text-sm font-medium transition-colors ${
                     location === '/vendedor/dashboard'
-                      ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
-                      : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                      ? (isScrolled || !isHomePage ? 'text-primary' : 'text-white font-semibold')
+                      : (isScrolled || !isHomePage ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
                   }`}>
                     Meus Produtos
                   </span>
@@ -101,8 +103,8 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
                 <Link href="/admin" data-testid="link-admin">
                   <span className={`cursor-pointer text-sm font-medium transition-colors ${
                     location === '/admin'
-                      ? (isScrolled ? 'text-primary' : 'text-white font-semibold')
-                      : (isScrolled ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
+                      ? (isScrolled || !isHomePage ? 'text-primary' : 'text-white font-semibold')
+                      : (isScrolled || !isHomePage ? 'text-foreground hover:text-primary' : 'text-white/90 hover:text-white')
                   }`}>
                     Admin
                   </span>
@@ -117,7 +119,7 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
                     size="icon" 
                     variant="ghost" 
                     className={`relative transition-colors ${
-                      isScrolled ? '' : 'text-white hover:text-white hover:bg-white/20'
+                      isScrolled || !isHomePage ? '' : 'text-white hover:text-white hover:bg-white/20'
                     }`}
                   >
                     <ShoppingCart className="h-5 w-5" />
@@ -136,7 +138,7 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
                       size="icon" 
                       variant="ghost" 
                       className={`transition-colors ${
-                        isScrolled ? '' : 'text-white hover:text-white hover:bg-white/20'
+                        isScrolled || !isHomePage ? '' : 'text-white hover:text-white hover:bg-white/20'
                       }`}
                       data-testid="button-user-menu"
                     >
@@ -159,8 +161,8 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
                 <Button
                   size="sm"
                   onClick={() => setLocation('/login')}
-                  className={isScrolled ? '' : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 border-white/30'}
-                  variant={isScrolled ? 'default' : 'outline'}
+                  className={isScrolled || !isHomePage ? '' : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 border-white/30'}
+                  variant={isScrolled || !isHomePage ? 'default' : 'outline'}
                   data-testid="button-login-nav"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
