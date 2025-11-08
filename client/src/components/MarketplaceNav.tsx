@@ -27,6 +27,7 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
       setIsScrolled(window.scrollY > 10);
     };
 
+    handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -37,7 +38,7 @@ export default function MarketplaceNav({ cartCount = 0 }: MarketplaceNavProps) {
         className={`sticky top-0 z-50 transition-all duration-300 ${
           isScrolled 
             ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm' 
-            : '!bg-transparent'
+            : 'bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6">
