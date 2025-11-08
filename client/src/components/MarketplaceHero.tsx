@@ -110,7 +110,7 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
             Economize antes que expire. Produtos com até 70% de desconto!
           </p>
 
-          <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl mx-auto">
+          <form onSubmit={handleSearch} className="flex items-center gap-2 max-w-2xl mx-auto">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
@@ -118,14 +118,14 @@ export default function MarketplaceHero({ imageSrc, onSearch }: MarketplaceHeroP
                 placeholder="Procurar produtos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 py-6 rounded-full bg-white/95 backdrop-blur-sm border-0"
+                className="pl-12 h-12 rounded-full bg-white/95 backdrop-blur-sm border-0"
                 data-testid="input-search"
               />
             </div>
             <Button
               type="submit"
               size="lg"
-              className="rounded-full px-8 py-6"
+              className="rounded-full px-8 h-12"
               data-testid="button-search"
             >
               Buscar
