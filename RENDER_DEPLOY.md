@@ -45,9 +45,30 @@ Execute as migrações do banco:
 
 ## ✨ Features Configuradas
 
-- ✅ Keep-alive automático (evita hibernação)
+- ✅ Keep-alive MELHORADO (evita hibernação):
+  - Ping a cada 5 minutos (antes era 10)
+  - Sistema de retry automático (3 tentativas com backoff exponencial)
+  - Timeout de 15 segundos por tentativa
+  - Logs detalhados para monitoramento
+  - Alerta de falhas consecutivas
 - ✅ Health check em /api/health
 - ✅ Database PostgreSQL
 - ✅ Sessões com secret
+
+## 📊 Monitoramento do Keep-alive
+
+Após o deploy, você verá nos logs do Render:
+- `✓ Keep-alive OK` - Sistema funcionando corretamente
+- `⚠ Keep-alive falhou` - Retentando automaticamente
+- `🔴 ALERTA` - Muitas falhas consecutivas (verificar configuração)
+
+## ⚠️ Importante sobre o Plano Gratuito do Render
+
+O plano gratuito do Render tem limitações:
+- Hiberna após 15 minutos de inatividade
+- Limite de 750 horas/mês
+- Mesmo com keep-alive, pode haver breves momentos de hibernação
+
+Para garantir 100% de uptime, considere upgrade para plano pago ($7/mês).
 
 Pronto para usar!

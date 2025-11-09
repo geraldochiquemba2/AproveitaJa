@@ -1,6 +1,10 @@
 import { log } from "./vite";
 
-const TEN_MINUTES = 10 * 60 * 1000; // 10 minutos em milissegundos
+const FIVE_MINUTES = 5 * 60 * 1000; // 5 minutos em milissegundos
+const PING_TIMEOUT = 15000; // 15 segundos timeout
+const MAX_RETRIES = 3; // Número máximo de tentativas
+
+let consecutiveFailures = 0;
 
 export function startKeepAlive() {
   // Só ativa em produção (no Render)
@@ -13,32 +17,60 @@ export function startKeepAlive() {
   const url = process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`;
   const healthCheckUrl = `${url}/api/health`;
 
-  log(`Keep-alive ativado - ping a cada 10 minutos em ${healthCheckUrl}`);
+  log(`🚀 Keep-alive ATIVADO - ping a cada 5 minutos em ${healthCheckUrl}`);
 
-  // Faz o primeiro ping após 1 minuto
+  // Faz o primeiro ping após 30 segundos
   setTimeout(() => {
-    pingServer(healthCheckUrl);
+    pingServerWithRetry(healthCheckUrl);
     
-    // Depois faz ping a cada 10 minutos
+    // Depois faz ping a cada 5 minutos
     setInterval(() => {
-      pingServer(healthCheckUrl);
-    }, TEN_MINUTES);
-  }, 60000); // 1 minuto
+      pingServerWithRetry(healthCheckUrl);
+    }, FIVE_MINUTES);
+  }, 30000); // 30 segundos
 }
 
-async function pingServer(url: string) {
+async function pingServerWithRetry(url: string, attempt: number = 1) {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), PING_TIMEOUT);
+
     const response = await fetch(url, {
       method: 'GET',
-      headers: { 'User-Agent': 'KeepAlive/1.0' }
+      headers: { 
+        'User-Agent': 'KeepAlive/2.0',
+        'Cache-Control': 'no-cache'
+      },
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
     
     if (response.ok) {
-      log(`✓ Keep-alive ping bem-sucedido - ${new Date().toISOString()}`);
+      consecutiveFailures = 0;
+      const data = await response.json();
+      log(`✓ Keep-alive OK [tentativa ${attempt}] - uptime: ${Math.floor(data.uptime)}s - ${new Date().toISOString()}`);
     } else {
-      log(`⚠ Keep-alive ping retornou status ${response.status}`);
+      throw new Error(`Status HTTP ${response.status}`);
     }
   } catch (error) {
-    log(`✗ Erro no keep-alive ping: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    consecutiveFailures++;
+    const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+    
+    if (attempt < MAX_RETRIES) {
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Backoff exponencial (max 10s)
+      log(`⚠ Keep-alive falhou (tentativa ${attempt}/${MAX_RETRIES}): ${errorMsg} - Retentando em ${delay/1000}s...`);
+      
+      setTimeout(() => {
+        pingServerWithRetry(url, attempt + 1);
+      }, delay);
+    } else {
+      log(`✗ Keep-alive FALHOU após ${MAX_RETRIES} tentativas: ${errorMsg} - Falhas consecutivas: ${consecutiveFailures}`);
+      
+      // Alerta se houver muitas falhas consecutivas
+      if (consecutiveFailures >= 3) {
+        log(`🔴 ALERTA: ${consecutiveFailures} falhas consecutivas de keep-alive! Verifique a configuração do Render.`);
+      }
+    }
   }
 }
